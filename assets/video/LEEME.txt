@@ -1,5 +1,0 @@
-Aquí va 1 archivo de video (formato .mp4):
-
-  quispe-sobre.mp4  -> el video de la Familia Quispe abriendo el sobre
-                        (el momento del sobre abriéndose debe ocurrir
-                        alrededor del segundo 8-9 del video)

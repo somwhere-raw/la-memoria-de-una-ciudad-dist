@@ -1,5 +1,0 @@
-Aquí van 3 fotografías (formato .jpg), con estos nombres EXACTOS:
-
-  barrio-01.jpg      -> una calle del Centro Histórico
-  barrio-02.jpg      -> un parque del Centro Histórico
-  nina-valeria.jpg   -> la fotografía de la niña (la revelación clave)

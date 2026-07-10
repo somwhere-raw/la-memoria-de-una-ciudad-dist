@@ -1,4 +1,0 @@
-Aquí va 1 archivo de audio (formato .mp3):
-
-  entrevista-ernesto.mp3  -> la conversación grabada con Don Ernesto
-                              (duración aproximada usada como referencia: 65 segundos)
