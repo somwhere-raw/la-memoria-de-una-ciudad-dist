@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+        content="La Memoria de una Ciudad — Un documental web interactivo sobre las historias de Lima que nadie ha guardado todavía." />
+  <meta property="og:title"   content="La Memoria de una Ciudad" />
+  <meta property="og:description"
+        content="Una investigación que comenzó con una cámara encontrada en una banca del Parque Universitario." />
+  <meta property="og:type"    content="website" />
+  <meta name="theme-color"    content="#0D0C0A" />
+
+  <title>La Memoria de una Ciudad</title>
+
+  <!--
+    PRECONNECT — Fase 6
+    GSAP, ScrollTrigger y Lenis se sirven desde CDN (ver </body>).
+    El preconnect adelanta el handshake DNS/TLS antes de que el parser
+    llegue a esas etiquetas <script>, ahorrando ida y vuelta en la carga inicial.
+  -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+
+  <!--
+    PRELOADS CRÍTICOS
+    La fuente narrativa principal (Lora) carga antes que cualquier otra cosa.
+    Autohospedadas: sin dependencia de Google Fonts en producción.
+  -->
+  <link rel="preload" as="font" type="font/woff2"
+        href="assets/fonts/lora/lora-regular.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2"
+        href="assets/fonts/inter/inter-400.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2"
+        href="assets/fonts/space-mono/space-mono-400.woff2" crossorigin />
+
+  <!--
+    Fase 6: preload de la imagen del hero. Es casi con certeza el elemento LCP
+    (Largest Contentful Paint) de la página — ocupa el primer viewport completo.
+    Sin este preload, el navegador no la descubre hasta parsear el <img> en el
+    body, perdiendo tiempo valioso en la métrica más importante de carga inicial.
+  -->
+  <link rel="preload" as="image" href="assets/images/misc/camara.jpg" fetchpriority="high" />
+
+  <!--
+    CASCADA DE ESTILOS
+    El orden es semántico: tokens → reset → base → eje → ramas individuales
+  -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/spine.css" />
+  <link rel="stylesheet" href="css/branches/podcast.css" />
+  <link rel="stylesheet" href="css/branches/mapa.css" />
+  <link rel="stylesheet" href="css/branches/video.css" />
+  <link rel="stylesheet" href="css/branches/libreta.css" />
+  <link rel="stylesheet" href="css/branches/map-col.css" />
+  <link rel="stylesheet" href="css/phase-3-base.css" />
+  <script>document.documentElement.classList.add('js');</script>
+  <link rel="stylesheet" href="css/branches/archivo.css" />
+  <link rel="stylesheet" href="css/phase-4-spine.css" />
+</head>
+
+<body>
+
+  <!-- Accesibilidad: saltar al contenido principal -->
+  <a href="#spine" class="skip-link">Saltar al relato</a>
+
+  <header class="story-header" aria-label="Cabecera del documental">
+    <a class="story-header__title" href="#beat-hallazgo">
+      La Memoria de una Ciudad
+    </a>
+    <p class="story-header__act">
+      <span class="sr-only">Momento actual: </span>
+      <span id="current-act" aria-live="polite">La ciudad inadvertida</span>
+    </p>
+    <button
+      id="review-unlock"
+      class="review-unlock"
+      type="button"
+      hidden
+      aria-label="Desbloquear todas las fases para revisión local">
+      Modo revisión
+    </button>
+  </header>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       INDICADOR DE ESPINA DORSAL
+       Barra lateral de progreso narrativo.
+       Muestra posición en el eje + ticks de ramas + icono de cerradura
+       en el nodo bloqueado.
+  ═══════════════════════════════════════════════════════════════ -->
+  <nav class="spine-indicator"
+       aria-label="Progreso narrativo"
+       role="navigation">
+
+    <div class="spine-indicator__track" aria-hidden="true">
+      <div class="spine-indicator__fill" id="spine-fill"></div>
+    </div>
+
+    <ol class="spine-indicator__nodes" role="list">
+
+      <li class="spine-indicator__node"
+          data-target="beat-hallazgo">
+        <button class="spine-indicator__dot"
+                aria-label="Inicio · El hallazgo"></button>
+      </li>
+
+      <li class="spine-indicator__node"
+          data-target="beat-rollo">
+        <button class="spine-indicator__dot"
+                aria-label="El rollo revelado"></button>
+      </li>
+
+      <li class="spine-indicator__node spine-indicator__node--branch"
+          data-target="beat-ernesto">
+        <button class="spine-indicator__dot"
+                aria-label="Don Ernesto Huanca · Podcast"></button>
+        <span class="spine-indicator__branch-tick" aria-hidden="true"></span>
+      </li>
+
+      <li class="spine-indicator__node spine-indicator__node--branch"
+          data-target="beat-lucia">
+        <button class="spine-indicator__dot"
+                aria-label="Lucía Fernández · Mapa"></button>
+        <span class="spine-indicator__branch-tick" aria-hidden="true"></span>
+      </li>
+
+      <li class="spine-indicator__node spine-indicator__node--branch"
+          data-target="beat-quispe">
+        <button class="spine-indicator__dot"
+                aria-label="Familia Quispe · Carta"></button>
+        <span class="spine-indicator__branch-tick" aria-hidden="true"></span>
+      </li>
+
+      <li class="spine-indicator__node"
+          data-target="beat-mecanismo">
+        <button class="spine-indicator__dot"
+                aria-label="El mecanismo · Esa noche"></button>
+      </li>
+
+      <li class="spine-indicator__node spine-indicator__node--lock"
+          data-target="beat-codigo"
+          data-locked="true">
+        <button class="spine-indicator__dot"
+                aria-label="Compartimento · Bloqueado"
+                aria-disabled="true"></button>
+        <span class="spine-indicator__lock-tick" aria-hidden="true"></span>
+      </li>
+
+      <li class="spine-indicator__node spine-indicator__node--branch"
+          data-target="beat-gabriel">
+        <button class="spine-indicator__dot"
+                aria-label="Gabriel Medina · La libreta"></button>
+        <span class="spine-indicator__branch-tick" aria-hidden="true"></span>
+      </li>
+
+      <li class="spine-indicator__node spine-indicator__node--branch"
+          data-target="beat-mapa-col">
+        <button class="spine-indicator__dot"
+                aria-label="El mapa · El último punto"></button>
+        <span class="spine-indicator__branch-tick" aria-hidden="true"></span>
+      </li>
+
+      <li class="spine-indicator__node"
+          data-target="beat-brena">
+        <button class="spine-indicator__dot"
+                aria-label="La última memoria"></button>
+      </li>
+
+      <li class="spine-indicator__node"
+          data-target="beat-nina">
+        <button class="spine-indicator__dot"
+                aria-label="El reconocimiento"></button>
+      </li>
+
+      <li class="spine-indicator__node"
+          data-target="beat-cierre">
+        <button class="spine-indicator__dot"
+                aria-label="El archivo abierto"></button>
+      </li>
+
+    </ol>
+  </nav>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       EJE PRINCIPAL · ESPINA DORSAL
+       15 momentos narrativos secuenciales.
+       Los beats de tipo branch-node contienen su rama como <aside>.
+  ═══════════════════════════════════════════════════════════════ -->
+  <main id="spine" class="spine">
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 01 · HALLAZGO
+         Tipo: hero
+         Parque Universitario · tarde de marzo
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-hallazgo"
+      class="beat beat--hero"
+      data-beat="hallazgo"
+      data-type="hero"
+      aria-label="El hallazgo · Parque Universitario · Marzo"
+    >
+      <!-- Fondo cinemático: la cámara debajo de la banca -->
+      <div class="beat__backdrop" aria-hidden="true">
+        <figure class="hero-image">
+          <img
+            src="assets/images/misc/camara.jpg"
+            alt="Cámara fotográfica analógica de 35 milímetros debajo de una banca del Parque Universitario, cubierta de hojas secas y una fina capa de polvo, con la correa asomando entre los barrotes."
+            width="1440"
+            height="900"
+            class="hero-image__img"
+            fetchpriority="high"
+          />
+        </figure>
+        <div class="hero-vignette" aria-hidden="true"></div>
+      </div>
+
+      <div class="beat__content beat__content--hero">
+        <header class="hero-header">
+          <div class="hero-header__eyebrow">
+            <span class="archive-label">Proyecto documental interactivo</span>
+            <time class="archive-label" datetime="XXXX-03">Lima · Centro Histórico</time>
+          </div>
+          <h1 class="hero-title">
+            <span class="hero-title__line">La Memoria</span>
+            <span class="hero-title__line">de una Ciudad</span>
+          </h1>
+        </header>
+
+        <div class="hero-prose prose">
+          <p>
+            Valeria Salazar tiene veintidós años y cursa el último ciclo de Comunicación
+            Audiovisual. Busca un tema para su tesis documental. Su profesor le sugiere
+            observar las historias que ya forman parte de su rutina. Esa tarde vuelve a
+            caminar por el Centro de Lima, como hacía de niña con su abuela. Debajo de
+            una banca del Parque Universitario encuentra una cámara de 35 milímetros,
+            cubierta de hojas secas y polvo, con una inscripción grabada a mano:
+            <em>La Memoria de una Ciudad.</em>
+          </p>
+        </div>
+
+        <div class="scroll-cue" aria-hidden="true">
+          <span class="scroll-cue__line"></span>
+          <span class="scroll-cue__text">continuar</span>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 01.5 · LA ÚLTIMA PISTA
+         Tipo: prose
+         El intento de devolverla · la decisión de revelar el rollo
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-pista"
+      class="beat beat--prose"
+      data-beat="pista"
+      data-type="prose"
+      aria-label="La última pista · El intento de encontrar al dueño"
+    >
+      <h2 class="sr-only">La última pista</h2>
+
+      <div class="beat__content">
+        <div class="prose">
+          <p>
+            La lleva al módulo de seguridad del parque: nadie ha reportado su pérdida.
+            En casa intenta rastrear el número de serie y un teléfono escrito a mano en
+            una etiqueta borrosa; la llamada solo devuelve una grabación que dice que
+            ese número ya no existe. Sin abrir la cámara, comprueba que todavía
+            contiene un rollo y deja constancia del hallazgo.
+          </p>
+          <p>
+            No quiere abrirla sin permiso: una imagen nunca es solo una imagen. Pero la
+            posibilidad de devolverla se agota. Tras obtener autorización, lleva la
+            cámara a un laboratorio analógico. Bajo la luz roja del cuarto oscuro,
+            retira el rollo y comienza el revelado sin saber todavía qué va a encontrar.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 02 · EL ROLLO
+         Tipo: image-sequence
+         Laboratorio del centro · contact sheet
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-rollo"
+      class="beat beat--image-sequence"
+      data-beat="rollo"
+      data-type="image-sequence"
+      aria-label="El rollo revelado · Laboratorio del centro"
+    >
+      <h2 class="sr-only">El rollo revelado</h2>
+
+      <div class="beat__content">
+        <p class="act-marker">Bajo la luz roja</p>
+        <div class="prose prose--centered">
+          <p>
+            El revelado toma varias horas. Cuando por fin sostiene los negativos
+            frente a la luz, no hay nada espectacular: solo momentos comunes
+            registrados con una atención particular, como si detrás de cada
+            imagen hubiera una intención y no el azar.
+          </p>
+        </div>
+
+        <!--
+          Contact sheet: las tres fotografías del primer rollo con sujetos identificables.
+          Cada tarjeta tiene anverso (foto) + reverso (fecha / dirección / frase).
+          La interacción de volteo la gestiona spine.js.
+        -->
+        <div class="contact-sheet contact-sheet--first"
+             role="list"
+             aria-label="Las tres fotografías del rollo: un hombre mayor, una mujer pintando un mural y una familia frente a una vivienda antigua">
+
+          <!-- Foto 01: Don Ernesto Huanca -->
+          <figure class="contact-frame"
+                  role="listitem"
+                  data-photo-id="ernesto">
+            <div class="contact-frame__flipper">
+              <div class="contact-frame__face contact-frame__face--front">
+                <img
+                  src="assets/images/contact-sheet/ernesto-anverso.jpg"
+                  alt="Un hombre mayor sentado en una calle del Centro Histórico, fotografiado desde cierta distancia, sin mirar a la cámara, como si solo continuara con su rutina."
+                  width="340" height="460"
+                  loading="lazy"
+              decoding="async"
+                  class="reveal-target is-revealed"
+                />
+                <span class="contact-frame__number archive-label" aria-hidden="true">01</span>
+                <div class="contact-frame__sprocket" aria-hidden="true"></div>
+              </div>
+              <div class="contact-frame__face contact-frame__face--back" aria-hidden="true">
+                <div class="photo-reverso">
+                  <time class="photo-reverso__date handwriting" datetime="XXXX-XX-XX">
+                    s/f
+                  </time>
+                  <p class="photo-reverso__address handwriting">Centro Histórico de Lima</p>
+                  <p class="photo-reverso__phrase handwriting">
+                    196
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button class="contact-frame__flip"
+                    aria-label="Ver el reverso de la fotografía 01"
+                    aria-pressed="false">
+              Reverso
+            </button>
+            <figcaption class="sr-only">
+              Fotografía 01: hombre mayor en una calle del Centro Histórico.
+              Reverso: una marca repetida en tinta, casi imperceptible: 196. Sin firma.
+            </figcaption>
+          </figure>
+
+          <!-- Foto 02: Lucía Fernández -->
+          <figure class="contact-frame"
+                  role="listitem"
+                  data-photo-id="lucia">
+            <div class="contact-frame__flipper">
+              <div class="contact-frame__face contact-frame__face--front">
+                <img
+                  src="assets/images/contact-sheet/lucia-anverso.jpg"
+                  alt="Una mujer pintando un muro grande, fotografiada de espaldas, en una iniciativa vecinal de arte urbano."
+                  width="340" height="460"
+                  loading="lazy"
+              decoding="async"
+                  class="reveal-target is-revealed"
+                />
+                <span class="contact-frame__number archive-label" aria-hidden="true">02</span>
+                <div class="contact-frame__sprocket" aria-hidden="true"></div>
+              </div>
+              <div class="contact-frame__face contact-frame__face--back" aria-hidden="true">
+                <div class="photo-reverso">
+                  <time class="photo-reverso__date handwriting">s/f</time>
+                  <p class="photo-reverso__address handwriting">Centro Histórico de Lima</p>
+                  <p class="photo-reverso__phrase handwriting">
+                    Antes de que desaparezca.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button class="contact-frame__flip"
+                    aria-label="Ver el reverso de la fotografía 02"
+                    aria-pressed="false">
+              Reverso
+            </button>
+            <figcaption class="sr-only">
+              Fotografía 02: mujer pintando un mural en el Centro Histórico.
+              Reverso: la frase "Antes de que desaparezca". Sin firma.
+            </figcaption>
+          </figure>
+
+          <!-- Foto 03: Familia Quispe -->
+          <figure class="contact-frame"
+                  role="listitem"
+                  data-photo-id="quispe">
+            <div class="contact-frame__flipper">
+              <div class="contact-frame__face contact-frame__face--front">
+                <img
+                  src="assets/images/contact-sheet/quispe-anverso.jpg"
+                  alt="Un grupo familiar reunido frente a una vivienda antigua del Centro Histórico, fotografiados sin posar para la cámara."
+                  width="340" height="460"
+                  loading="lazy"
+              decoding="async"
+                  class="reveal-target is-revealed"
+                />
+                <span class="contact-frame__number archive-label" aria-hidden="true">03</span>
+                <div class="contact-frame__sprocket" aria-hidden="true"></div>
+              </div>
+              <div class="contact-frame__face contact-frame__face--back" aria-hidden="true">
+                <div class="photo-reverso">
+                  <time class="photo-reverso__date handwriting">s/f</time>
+                  <p class="photo-reverso__address handwriting">Centro Histórico de Lima</p>
+                  <p class="photo-reverso__phrase handwriting">
+                    Una casa que ha visto crecer varias generaciones.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button class="contact-frame__flip"
+                    aria-label="Ver el reverso de la fotografía 03"
+                    aria-pressed="false">
+              Reverso
+            </button>
+            <figcaption class="sr-only">
+              Fotografía 03: familia reunida frente a una vivienda antigua del Centro Histórico.
+              Reverso: una frase sobre la casa. Sin firma.
+            </figcaption>
+          </figure>
+
+        </div><!-- /.contact-sheet--first -->
+
+        <div class="prose prose--centered prose--after-images">
+          <p>
+            Algunas fotos tienen una fecha y una dirección al reverso. Otras,
+            solo una frase breve. En una esquina de los negativos, Valeria
+            encuentra además una marca repetida, casi imperceptible:
+            tres dígitos escritos con tinta. No sabe todavía qué significan.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 03 · LA CONVOCATORIA
+         Tipo: prose · contraste digital
+         Instagram · la pregunta simple
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-instagram"
+      class="beat beat--prose beat--digital"
+      data-beat="instagram"
+      data-type="prose"
+      aria-label="La convocatoria · Instagram y TikTok"
+    >
+      <h2 class="sr-only">La convocatoria en Instagram y TikTok</h2>
+
+      <div class="beat__content">
+        <p class="act-marker">Los nombres</p>
+        <div class="prose">
+          <p>
+            Al día siguiente publica tres de las fotografías en Instagram y TikTok.
+            Explica dónde encontró la cámara y pregunta si alguien reconoce los lugares
+            o a las personas. Durante las primeras horas, la publicación se queda en
+            silencio entre las demás imágenes de la ciudad.
+          </p>
+        </div>
+
+        <!--
+          Publicación en Instagram: el contraste estético entre lo digital y lo analógico.
+          Su apariencia es intencionalmente distinta al lenguaje visual del resto del eje.
+        -->
+        <figure class="instagram-post"
+                aria-label="Publicación de Valeria en Instagram con las tres fotografías escaneadas">
+          <div class="instagram-post__chrome" aria-hidden="true">
+            <div class="instagram-post__avatar"></div>
+            <span class="instagram-post__username">valeria_investiga</span>
+          </div>
+          <div class="instagram-post__images" aria-hidden="true">
+            <div class="instagram-thumb" data-photo="ernesto"></div>
+            <div class="instagram-thumb" data-photo="lucia"></div>
+            <div class="instagram-thumb" data-photo="quispe"></div>
+          </div>
+          <blockquote class="instagram-post__caption">
+            <p>Encontré esta cámara analógica abandonada en el Parque Universitario. ¿Alguien reconoce estos lugares o a estas personas?</p>
+            <p class="instagram-post__tags" aria-hidden="true">
+              #Lima #CentroHistorico #MemoriaUrbana
+            </p>
+          </blockquote>
+          <figcaption class="sr-only">
+            Publicación en Instagram con las tres fotografías del rollo.
+            Pregunta: ¿Alguien reconoce estos lugares o a estas personas?
+          </figcaption>
+        </figure>
+
+        <div class="prose prose--after-image">
+          <p>
+            En los días siguientes la publicación empieza a circular entre fotógrafos
+            aficionados, vecinos del Centro y antiguos residentes. Nadie identifica
+            todavía al fotógrafo, pero las respuestas se acumulan: una fachada
+            modificada, un negocio que ya no existe, una calle que cambió de nombre.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 04 · DON ERNESTO HUANCA
+         Tipo: branch-node → podcast
+         El primer rostro · la segunda visita · evidencia reservada a la rama
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-ernesto"
+      class="beat beat--branch-node"
+      data-beat="ernesto"
+      data-type="branch-node"
+      data-branch="podcast"
+      aria-label="Don Ernesto Huanca · El primer rostro"
+    >
+      <h2 class="sr-only">Don Ernesto Huanca</h2>
+
+      <div class="beat__content">
+        <div class="prose">
+          <p>
+            La primera respuesta concreta llega de una cuenta desconocida: alguien
+            reconoce el lugar. El mensaje conduce a Don Ernesto Huanca, quien observa
+            la fotografía en silencio durante varios segundos antes de reconocerse en
+            ella, muchos años atrás.
+          </p>
+          <p>
+            No recuerda haber entregado esa cámara a nadie, pero sí a un hombre que
+            solía recorrer esas calles con un equipo antiguo, registrando lo que
+            estaba a punto de desaparecer. Valeria vuelve a escucharlo unos días
+            después, cuando Don Ernesto recuerda haber guardado algo de esa época.
+            La pista no está completa en la fotografía: está en la voz, en la pausa
+            y en una copia que él conserva sin haberle dado importancia.
+          </p>
+        </div>
+
+        <!-- Nodo de entrada: Podcast -->
+        <div class="branch-node" data-branch-id="podcast">
+          <div class="branch-node__signal" aria-hidden="true">
+            <span class="branch-node__eyebrow">
+              <span class="archive-label">La voz de Ernesto</span>
+              <span class="archive-label">Primer testimonio</span>
+            </span>
+          </div>
+          <button
+            class="branch-node__enter"
+            data-branch="podcast"
+            aria-expanded="false"
+            aria-controls="branch-podcast"
+            aria-label="Escuchar la recreación sonora del testimonio de Don Ernesto Huanca"
+          >Escuchar recreación</button>
+        </div>
+      </div>
+
+      <!--
+        ╔═══════════════════════════════════╗
+        ║  BRANCH 01 · PODCAST             ║
+        ║  Don Ernesto Huanca              ║
+        ║  El primer rostro · Centro       ║
+        ╚═══════════════════════════════════╝
+        Identidad UI: registro de campo sobrio.
+        Onda de audio (SVG), transcripción sincronizada, separación temporal
+        entre encuentros y evidencia física: fotografía con 196 al reverso.
+      -->
+      <aside
+        id="branch-podcast"
+        class="branch branch--podcast"
+        data-branch-id="podcast"
+        aria-hidden="true"
+        aria-label="Recreación sonora documental · Don Ernesto Huanca"
+        role="complementary"
+        hidden
+      >
+        <div class="branch__inner">
+
+          <header class="branch__header">
+            <button class="branch__close"
+                    data-branch="podcast"
+                    aria-label="Cerrar la recreación sonora y regresar al relato">
+              <span aria-hidden="true">←</span> Regresar
+            </button>
+            <div class="branch__meta">
+              <span class="archive-label">La Memoria de una Ciudad</span>
+              <span class="archive-label">La voz de Ernesto</span>
+            </div>
+          </header>
+
+          <article class="podcast-player"
+                   aria-label="Reproductor · Don Ernesto Huanca">
+
+            <header class="podcast-intro">
+              <p class="archive-label">Don Ernesto Huanca · Centro Histórico de Lima</p>
+              <h3>Una voz antes que una pista</h3>
+              <p>
+                Valeria escucha primero el reconocimiento de la fotografía. Días
+                después, la voz vuelve con una copia guardada y una marca que no
+                aparecía en el primer revelado.
+              </p>
+              <div class="podcast-recording-meta" aria-label="Momentos de la escucha">
+                <span><strong>Primera visita</strong> la foto reconocida</span>
+                <span><strong>Segunda visita</strong> la copia guardada</span>
+                <span><strong>Marca</strong> 196</span>
+              </div>
+            </header>
+
+            <!--
+              Waveform analógica: SVG generado por podcast.js al cargar el audio.
+              No es un gráfico de barras digitales; es una línea continua
+              con leve inestabilidad orgánica que simula cinta magnética.
+            -->
+            <div class="podcast-waveform"
+                 id="podcast-waveform"
+                 role="img"
+                 aria-label="Visualización de la onda de la recreación sonora">
+              <!-- Inyectado por podcast.js -->
+            </div>
+
+            <!-- Audio (src inyectado por podcast.js al entrar a la rama) -->
+            <audio id="podcast-audio"
+                   preload="none"
+                   aria-label="Recreación sonora completa · Don Ernesto Huanca · Centro Histórico de Lima">
+            </audio>
+
+            <!-- Controles del reproductor -->
+            <div class="podcast-controls"
+                 role="group"
+                 aria-label="Controles de reproducción">
+              <button id="podcast-play"
+                      class="podcast-controls__play"
+                      aria-label="Reproducir"
+                      data-state="paused">
+                <span class="podcast-controls__play-icon" aria-hidden="true"></span>
+              </button>
+
+              <div class="podcast-controls__timeline"
+                   role="group"
+                   aria-label="Línea de tiempo de la recreación sonora">
+                <input
+                  type="range"
+                  id="podcast-scrubber"
+                  class="podcast-controls__scrubber"
+                  min="0" max="100" value="0" step="0.1"
+                  aria-label="Posición en la recreación sonora"
+                  aria-valuemin="0" aria-valuemax="100"
+                  aria-valuenow="0" aria-valuetext="0%"
+                />
+                <div class="podcast-controls__fill" aria-hidden="true"></div>
+              </div>
+
+              <time id="podcast-time"
+                    class="podcast-controls__time archive-label"
+                    datetime="PT0S">00:00</time>
+              <span class="podcast-controls__duration archive-label"
+                    aria-hidden="true">/ 01:05</span>
+            </div>
+
+            <!--
+              Transcripción sincronizada.
+              Las líneas se inyectan y activan por podcast.js conforme avanza el audio.
+              Estructura de cada línea (inyectada dinámicamente):
+
+              <div class="transcript-line" data-start="29.8" data-end="38.3"
+                   data-key-moment="true">
+                <p class="transcript-line__text">
+                  Encontré una copia de la misma foto en una caja. Al reverso
+                  hay un número.
+                </p>
+                <aside class="transcript-note" aria-label="Nota de Valeria">
+                  <p class="transcript-note__text handwriting">
+                    ¿Por qué guardó una copia con una anotación distinta?
+                  </p>
+                </aside>
+              </div>
+            -->
+            <div class="podcast-transcript"
+                 id="podcast-transcript"
+                 role="region"
+                 aria-label="Transcripción de la recreación sonora"
+                 tabindex="0">
+            </div>
+            <p id="podcast-live-status"
+               class="sr-only"
+               role="status"
+               aria-live="polite"
+               aria-atomic="true"></p>
+
+            <!--
+              Evidencia física: la copia de la fotografía que Don Ernesto guardaba
+              en una caja antigua, con la anotación 196 escrita al reverso —
+              la misma letra apretada que Valeria empieza a reconocer.
+              Aparece al llegar al momento clave de la grabación (data-key-moment).
+              reveal.js lo emerge desde el negro con el efecto de revelado químico.
+            -->
+            <figure class="podcast-evidence"
+                    id="evidence-196"
+                    aria-hidden="true"
+                    hidden
+                    role="img"
+                    aria-label="Copia de la fotografía encontrada en la caja de Don Ernesto, con el número 196 escrito al reverso">
+              <div class="folded-paper">
+                <div class="folded-paper__crease" aria-hidden="true"></div>
+                <div class="folded-paper__content">
+                  <p class="handwriting folded-paper__instruction">
+                    La misma foto. La misma letra apretada.
+                  </p>
+                  <p class="handwriting folded-paper__numbers"
+                     aria-label="El número ciento noventa y seis">
+                    196
+                  </p>
+                </div>
+              </div>
+              <figcaption class="sr-only">
+                Copia fotográfica guardada por Don Ernesto durante años.
+                Anotación al reverso: 196.
+                Primera cifra confirmada durante la investigación.
+              </figcaption>
+            </figure>
+
+          </article>
+        </div><!-- /.branch__inner -->
+      </aside>
+      <!-- FIN BRANCH 01 · PODCAST ──────────────────── -->
+
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 05 · LUCÍA FERNÁNDEZ
+         Tipo: branch-node → mapa
+         El mural · el mapa de Gabriel · evidencia reservada a la rama
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-lucia"
+      class="beat beat--branch-node"
+      data-beat="lucia"
+      data-type="branch-node"
+      data-branch="mapa"
+      aria-label="Lucía Fernández · El mural · El mapa de Gabriel"
+    >
+      <h2 class="sr-only">Lucía Fernández y el mapa de Gabriel</h2>
+
+      <div class="beat__content">
+        <div class="prose">
+          <p>
+            Entre los mensajes aparece uno que reconoce el mural de una de las fotos:
+            Lucía Fernández, artista urbana que participó en proyectos de arte
+            comunitario en el Centro. Se encuentran frente al mismo muro, ya desgastado
+            y con marcas de construcción en una parte de la pared. También reconoce a
+            Gabriel: el fotógrafo que dedicaba más tiempo a conversar que a fotografiar.
+          </p>
+          <p>
+            Lucía conserva un mapa antiguo del Centro que Gabriel le dejó, con círculos,
+            fechas y nombres escritos a mano. No marca monumentos, sino lugares ligados
+            a historias comunes. Algunas de esas zonas están amenazadas por un proyecto
+            de renovación urbana. Antes de despedirse, le entrega una copia. Valeria
+            entiende que el mapa no sirve para ubicarse rápido: sirve para mirar la
+            ciudad como Gabriel la estaba ordenando.
+          </p>
+        </div>
+
+        <!-- Nodo de entrada: Mapa -->
+        <div class="branch-node" data-branch-id="mapa">
+          <div class="branch-node__signal" aria-hidden="true">
+            <span class="branch-node__eyebrow">
+              <span class="archive-label">El mapa de Lucía</span>
+              <span class="archive-label">El mapa de Gabriel</span>
+            </span>
+          </div>
+          <button
+            class="branch-node__enter"
+            data-branch="mapa"
+            aria-expanded="false"
+            aria-controls="branch-mapa"
+            aria-label="Explorar el mapa de Gabriel Medina sobre Lima"
+          >Abrir el mapa</button>
+        </div>
+      </div>
+
+      <!--
+        ╔═══════════════════════════════════╗
+        ║  BRANCH 02 · MAPA VIVO           ║
+        ║  Lucía Fernández · Lima Centro   ║
+        ╚═══════════════════════════════════╝
+        Identidad UI: cartografía sobre papel de calco.
+        No es Google Maps. Plano dibujado a mano con puntos × marcados,
+        tramas en zonas amenazadas y panel lateral de detalle.
+        Al revisar los dos puntos conocidos en este momento, se revela
+        la marca 247 en la esquina del mapa.
+      -->
+      <aside
+        id="branch-mapa"
+        class="branch branch--mapa"
+        data-branch-id="mapa"
+        aria-hidden="true"
+        aria-label="Mapa de Gabriel Medina · Centro Histórico de Lima"
+        role="complementary"
+        hidden
+      >
+        <div class="branch__inner">
+
+          <header class="branch__header">
+            <button class="branch__close"
+                    data-branch="mapa"
+                    aria-label="Cerrar el mapa y regresar al relato">
+              <span aria-hidden="true">←</span> Regresar
+            </button>
+            <div class="branch__meta">
+              <span class="archive-label">La Memoria de una Ciudad</span>
+              <span class="archive-label"
+                    id="mapa-count"
+                    aria-live="polite">
+                <span id="mapa-verified">0</span> de 2 puntos revisados
+              </span>
+            </div>
+          </header>
+
+          <article class="mapa-explorer"
+                   aria-label="Mapa interactivo del Centro Histórico de Lima">
+
+            <header class="mapa-intro">
+              <p class="archive-label">Copia entregada por Lucía Fernández</p>
+              <h3>Historias comunes, no monumentos</h3>
+              <p>
+                Gabriel anotó nombres, fechas y lugares vinculados a la vida
+                cotidiana. Revisa los dos puntos que Valeria conoce hasta este
+                momento. Las tramas señalan zonas amenazadas por la renovación urbana.
+              </p>
+              <div class="mapa-key" aria-label="Leyenda del mapa">
+                <span><b aria-hidden="true">×</b> Historia documentada</span>
+                <span><i aria-hidden="true"></i> Zona amenazada</span>
+              </div>
+            </header>
+
+            <figure class="mapa-canvas"
+                    aria-label="Plano a mano alzada del centro de Lima con los puntos de Gabriel Medina">
+              <div class="mapa-canvas__surface">
+
+                <!-- Base: cartografía dibujada a mano (no Google Maps) -->
+                <img
+                  src="svg/map-base.svg"
+                  alt="Mapa dibujado a mano del centro histórico de Lima. Las zonas tramadas corresponden a inmuebles antiguos amenazados por un proyecto de renovación urbana."
+                  width="900" height="620"
+                  loading="lazy"
+                  decoding="async"
+                  class="mapa-canvas__base"
+                />
+
+                <!-- Trama de zonas amenazadas, diferenciada también por patrón -->
+                <div class="mapa-overlay--threatened" aria-hidden="true"></div>
+
+                <!-- Puntos interactivos sobre el mapa -->
+                <div class="mapa-points"
+                     role="group"
+                     aria-label="Puntos documentados por Gabriel Medina">
+
+                  <button class="mapa-point"
+                          data-point-id="ernesto-huanca"
+                          data-reveal-order="1"
+                          data-threatened="true"
+                          style="left:42%;top:31%"
+                          aria-label="Don Ernesto Huanca · Centro Histórico">
+                    <span class="mapa-point__cross" aria-hidden="true">×</span>
+                    <span class="mapa-point__pulse" aria-hidden="true"></span>
+                  </button>
+
+                  <button class="mapa-point"
+                          data-point-id="lucia-mural"
+                          data-reveal-order="2"
+                          data-threatened="true"
+                          style="left:58%;top:44%"
+                          aria-label="Lucía Fernández · Mural comunitario · Centro Histórico">
+                    <span class="mapa-point__cross" aria-hidden="true">×</span>
+                    <span class="mapa-point__pulse" aria-hidden="true"></span>
+                  </button>
+
+                </div><!-- /.mapa-points -->
+              </div><!-- /.mapa-canvas__surface -->
+
+              <figcaption class="sr-only">
+                Mapa dibujado a mano del centro histórico de Lima.
+                Los × corresponden a personas fotografiadas por Gabriel Medina.
+                Las zonas tramadas indican áreas amenazadas por la renovación urbana.
+              </figcaption>
+            </figure>
+
+            <!-- Panel de detalle del punto seleccionado (inyectado por mapa.js) -->
+            <aside class="mapa-detail"
+                   id="mapa-detail"
+                   aria-live="polite"
+                   aria-label="Detalle del punto seleccionado"
+                   hidden>
+              <button class="mapa-detail__close"
+                      aria-label="Cerrar detalle">×</button>
+              <div class="mapa-detail__photo-wrap">
+                <img class="mapa-detail__photo reveal-target"
+                     alt="" width="260" height="340" />
+                <p class="mapa-detail__photo-status"
+                   role="status"
+                   hidden></p>
+              </div>
+              <div class="mapa-detail__info">
+                <p class="mapa-detail__person"></p>
+                <p class="mapa-detail__occupation archive-label"></p>
+                <p class="mapa-detail__address archive-label"></p>
+                <p class="mapa-detail__caption"></p>
+              </div>
+            </aside>
+
+            <!--
+              Evidencia física: la esquina del mapa con la marca 247.
+              Se revela cuando los dos puntos conocidos en este momento
+              fueron explorados. Su función todavía no está confirmada.
+            -->
+            <figure class="podcast-evidence mapa-evidence"
+                    id="evidence-247-mapa"
+                    aria-hidden="true"
+                    hidden
+                    role="img"
+                    aria-label="Esquina del mapa de Gabriel con el número 247 escrito a mano">
+              <div class="folded-paper">
+                <div class="folded-paper__crease" aria-hidden="true"></div>
+                <div class="folded-paper__content">
+                  <p class="handwriting folded-paper__instruction">
+                    En la esquina del mapa, otra marca.
+                  </p>
+                  <p class="handwriting folded-paper__numbers"
+                     aria-label="El número doscientos cuarenta y siete">
+                    247
+                  </p>
+                </div>
+              </div>
+              <figcaption class="sr-only">
+                Esquina del mapa de Gabriel Medina con el número 247 escrito a mano.
+                Segunda cifra encontrada durante la investigación.
+              </figcaption>
+            </figure>
+
+          </article>
+        </div><!-- /.branch__inner -->
+      </aside>
+      <!-- FIN BRANCH 02 · MAPA ─────────────────────── -->
+
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 06 · FAMILIA QUISPE
+         Tipo: branch-node → video
+         La vivienda antigua · la carta · confirmación reservada a la rama
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-quispe"
+      class="beat beat--branch-node"
+      data-beat="quispe"
+      data-type="branch-node"
+      data-branch="video"
+      aria-label="Familia Quispe · La carta que quedó esperando"
+    >
+      <h2 class="sr-only">Familia Quispe y la carta de Gabriel</h2>
+
+      <div class="beat__content">
+        <div class="prose">
+          <p>
+            Una nueva fotografía del rollo —una vivienda antigua, una familia reunida
+            frente a la puerta— recibe respuesta de una joven que reconoce la fachada:
+            fue la casa de sus abuelos. Cuando Valeria llega entiende por qué Gabriel
+            la fotografió: no tiene nada llamativo, es la casa donde varias generaciones
+            de esa familia crecieron. Le muestran una caja con documentos antiguos.
+          </p>
+          <p>
+            Dentro hay un sobre que Gabriel les pidió conservar años atrás. Valeria
+            registra el momento en video: las manos abriendo el sobre y la revisión
+            cuidadosa de su contenido. La hoja no explica todo; apenas confirma que
+            las marcas que parecían aisladas pertenecen a una misma forma de ordenar
+            recuerdos ajenos.
+          </p>
+        </div>
+
+        <!-- Nodo de entrada: Video -->
+        <div class="branch-node" data-branch-id="video">
+          <div class="branch-node__signal" aria-hidden="true">
+            <span class="branch-node__eyebrow">
+              <span class="archive-label">La carta de los Quispe</span>
+              <span class="archive-label">La carta que quedó esperando</span>
+            </span>
+          </div>
+          <button
+            class="branch-node__enter"
+            data-branch="video"
+            aria-expanded="false"
+            aria-controls="branch-video"
+            aria-label="Revisar el registro de la Familia Quispe y la hoja conservada"
+          >Revisar el registro</button>
+        </div>
+      </div>
+
+      <!--
+        ╔═══════════════════════════════════╗
+        ║  BRANCH 03 · REGISTRO DE VISITA  ║
+        ║  Familia Quispe · La carta       ║
+        ╚═══════════════════════════════════╝
+        Identidad UI: registro audiovisual realizado por Valeria y documento
+        familiar. La hoja se examina mediante una acción explícita.
+      -->
+      <aside
+        id="branch-video"
+        class="branch branch--video"
+        data-branch-id="video"
+        aria-hidden="true"
+        aria-label="Registro de visita · Familia Quispe · Hoja conservada para Gabriel Medina"
+        role="complementary"
+        hidden
+      >
+        <div class="branch__inner">
+
+          <header class="branch__header">
+            <button class="branch__close"
+                    data-branch="video"
+                    aria-label="Cerrar el registro de los Quispe y regresar al relato">
+              <span aria-hidden="true">←</span> Regresar
+            </button>
+            <div class="branch__meta">
+              <span class="archive-label">La Memoria de una Ciudad</span>
+              <span class="archive-label">Registro de visita · Centro de Lima</span>
+            </div>
+          </header>
+
+          <article class="video-player"
+                   aria-labelledby="quispe-register-title">
+
+            <header class="video-intro">
+              <p class="archive-label">Documento familiar · visita de Valeria</p>
+              <h3 id="quispe-register-title">Una casa habitada por generaciones</h3>
+              <p>
+                La grabación acompaña un testimonio familiar. El dato decisivo no
+                depende del video: también aparece en el sobre que la familia
+                conservó para Gabriel.
+              </p>
+            </header>
+
+            <div class="video-layout">
+              <div class="video-record">
+                <figure class="video-container">
+                  <!--
+                    src y track se inyectan por video.js al abrir la rama.
+                    Los controles nativos mantienen reproducción, volumen,
+                    búsqueda y subtítulos bajo control del usuario.
+                  -->
+                  <video
+                    id="quispe-video"
+                    class="video-player__el"
+                    preload="none"
+                    controls
+                    playsinline
+                    aria-describedby="quispe-video-caption"
+                    aria-label="Registro de Valeria durante la apertura del sobre conservado por la familia Quispe"
+                  >
+                    <track id="quispe-captions"
+                           kind="captions"
+                           srclang="es"
+                           label="Subtítulos en español"
+                           default />
+                    <p>
+                      Este navegador no puede reproducir el video. La escena
+                      también puede leerse más abajo.
+                    </p>
+                  </video>
+                  <figcaption id="quispe-video-caption" class="video-caption">
+                    Registro audiovisual realizado por Valeria durante la visita a
+                    la vivienda familiar.
+                  </figcaption>
+                </figure>
+
+                <p id="video-resource-status"
+                   class="video-resource-status"
+                   role="status"
+                   hidden></p>
+              </div>
+
+              <section class="video-document"
+                       aria-labelledby="quispe-document-title">
+                <p class="archive-label">Alternativa documental</p>
+                <h4 id="quispe-document-title">El sobre conservado</h4>
+                <p>
+                  La familia guarda una caja de documentos. Dentro hay un sobre que
+                  Gabriel les pidió conservar y, en su interior, una hoja doblada con
+                  una cifra escrita en una esquina.
+                </p>
+                <button id="video-evidence-review"
+                        class="video-document__review"
+                        type="button"
+                        aria-controls="evidence-247-confirm"
+                        aria-expanded="false">
+                  Examinar la hoja
+                </button>
+              </section>
+            </div>
+
+            <!--
+              Evidencia: la carta confirma el mismo número que ya entregó Lucía.
+              No introduce un fragmento nuevo. No se atribuye a Gabriel una
+              intención criptográfica que el canon no confirma.
+            -->
+            <figure class="video-evidence"
+                    id="evidence-247-confirm"
+                    aria-hidden="true"
+                    hidden
+                    tabindex="-1"
+                    aria-label="Hoja doblada encontrada en la caja de la Familia Quispe con el número 247, igual al del mapa de Lucía">
+              <div class="letter-paper">
+                <div class="letter-paper__fold" aria-hidden="true"></div>
+                <div class="letter-paper__body">
+                  <p class="letter-paper__meta archive-label">
+                    Hoja conservada por la familia Quispe
+                  </p>
+                  <p class="handwriting letter-paper__numbers"
+                     aria-label="El número doscientos cuarenta y siete, confirmado">
+                    247
+                  </p>
+                </div>
+              </div>
+              <figcaption class="video-evidence__caption">
+                La cifra coincide con la referencia del mapa de Lucía. Esta segunda
+                aparición confirma 247; no añade un tercer fragmento.
+              </figcaption>
+            </figure>
+
+          </article>
+        </div><!-- /.branch__inner -->
+      </aside>
+      <!-- FIN BRANCH 03 · VIDEO ────────────────────── -->
+
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 07 · LAS TRES PIEZAS REUNIDAS
+         Tipo: prose · tensión
+         196 · 247 · la confirmación · el mecanismo descubierto
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-mecanismo"
+      class="beat beat--prose beat--tension"
+      data-beat="mecanismo"
+      data-type="prose"
+      aria-label="Las tres piezas reunidas · El mecanismo descubierto"
+    >
+      <h2 class="sr-only">El mecanismo descubierto</h2>
+
+      <div class="beat__content">
+        <p class="act-marker">La combinación</p>
+        <div class="prose prose--tension">
+          <p>
+            Con las tres piezas reunidas, Valeria vuelve a examinar la cámara con más
+            atención de la que le dedicó al principio. Nota una resistencia extraña en
+            el cuerpo metálico: una separación apenas perceptible que no parece un
+            defecto de fábrica, sino una modificación hecha a propósito.
+          </p>
+        </div>
+
+        <!--
+          Las tres piezas sobre la mesa: 196 (Ernesto), 247 (Lucía) y su confirmación (Quispe).
+          state.js exige 196, el 247 de Lucía y la confirmación Quispe.
+          Esta última no añade dígitos: valida la procedencia del fragmento.
+        -->
+        <div class="evidence-table"
+             role="group"
+             aria-label="Las piezas del código reunidas sobre la mesa">
+
+          <figure class="evidence-table__item" data-fragment="196">
+            <div class="folded-paper folded-paper--sm">
+              <p class="handwriting folded-paper__numbers"
+                 aria-label="Fragmento uno: ciento noventa y seis">
+                196
+              </p>
+            </div>
+            <figcaption class="archive-label">Don Ernesto Huanca</figcaption>
+          </figure>
+
+          <span class="evidence-table__connector" aria-hidden="true">·</span>
+
+          <figure class="evidence-table__item" data-fragment="247">
+            <div class="letter-paper letter-paper--sm">
+              <p class="handwriting folded-paper__numbers"
+                 aria-label="Fragmento dos: doscientos cuarenta y siete">
+                247
+              </p>
+            </div>
+            <figcaption class="archive-label">Lucía Fernández</figcaption>
+          </figure>
+
+          <span class="evidence-table__connector" aria-hidden="true">·</span>
+
+          <figure class="evidence-table__item" data-fragment="247-confirm">
+            <div class="letter-paper letter-paper--sm">
+              <p class="handwriting folded-paper__numbers"
+                 aria-label="Confirmación: doscientos cuarenta y siete, igual al de Lucía">
+                247
+              </p>
+            </div>
+            <figcaption class="archive-label">Familia Quispe · confirma</figcaption>
+          </figure>
+
+        </div><!-- /.evidence-table -->
+
+        <div class="prose prose--tension">
+          <p>
+            Revisa la zona donde están grabados los números y descubre, bajo una
+            pequeña cubierta lateral, seis ruedas metálicas: un mecanismo de
+            combinación. La secuencia solo adquiere sentido después de reconstruir
+            las historias vinculadas a las tres evidencias.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 08 · EL COMPARTIMENTO
+         Tipo: lock-gate → branch archivo
+         data-locked="true" hasta confirmar las tres evidencias
+         El único nodo condicional de toda la experiencia.
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-codigo"
+      class="beat beat--lock-gate"
+      data-beat="codigo"
+      data-type="lock-gate"
+      data-branch="archivo"
+      data-locked="true"
+      aria-label="El compartimento de la cámara · Combinación de seis dígitos"
+    >
+      <h2 class="sr-only">El compartimento de la cámara</h2>
+
+      <div class="beat__content">
+        <div class="prose">
+          <p>
+            Alinea las seis ruedas hasta formar 196247. Un clic seco confirma la
+            combinación y una parte de la carcasa se separa, revelando un
+            compartimento integrado en la cámara.
+          </p>
+        </div>
+
+        <!--
+          Nodo de rama con estado de bloqueo.
+          spine.js escucha state.archiveUnlocked.
+          Cuando cambia a true: anima los diales hasta 1-9-6-2-4-7,
+          retira data-locked, activa el botón.
+        -->
+        <div class="branch-node branch-node--lockable"
+             data-branch-id="archivo"
+             data-locked="true">
+
+          <!-- Vista previa: la cámara con los diales sellados -->
+          <figure class="lock-preview" aria-hidden="true">
+            <div class="lock-preview__camera">
+              <div class="lock-preview__dials">
+                <span class="lock-preview__dial">—</span>
+                <span class="lock-preview__dial">—</span>
+                <span class="lock-preview__dial">—</span>
+                <span class="lock-preview__dial">—</span>
+                <span class="lock-preview__dial">—</span>
+                <span class="lock-preview__dial">—</span>
+              </div>
+              <div class="lock-preview__hatch"></div>
+            </div>
+          </figure>
+
+          <!-- Indicador de estado bloqueado (actualizado por spine.js) -->
+          <div class="branch-node__lock-msg"
+               id="archivo-lock-msg"
+               aria-live="polite"
+               aria-atomic="true">
+            <p class="archive-label">Faltan testimonios por reconstruir.</p>
+          </div>
+
+          <!-- Botón deshabilitado hasta que ambos fragmentos estén en state -->
+          <button
+            class="branch-node__enter branch-node__enter--locked"
+            data-branch="archivo"
+            aria-expanded="false"
+            aria-controls="branch-archivo"
+            aria-label="Abrir el compartimento · Se requiere el código completo"
+            disabled
+          >Abrir compartimento</button>
+        </div>
+      </div>
+
+      <!--
+        ╔═══════════════════════════════════╗
+        ║  RAMA · EL COMPARTIMENTO         ║
+        ║  El compartimento · 196247        ║
+        ╚═══════════════════════════════════╝
+        Identidad UI: la recompensa. La cerradura que toda la experiencia espera.
+        Fases:
+          1 · El mecanismo de seis diales
+          2 · El compartimento se abre · el rollo · el sobre sellado
+      -->
+      <aside
+        id="branch-archivo"
+        class="branch branch--archivo"
+        data-branch-id="archivo"
+        aria-hidden="true"
+        aria-label="Archivo oculto · Compartimento de la cámara · Código 196247"
+        role="complementary"
+        hidden
+      >
+        <div class="branch__inner">
+
+          <header class="branch__header">
+            <button class="branch__close"
+                    data-branch="archivo"
+                    aria-label="Cerrar el archivo y regresar al relato">
+              <span aria-hidden="true">←</span> Regresar
+            </button>
+            <div class="branch__meta">
+              <span class="archive-label">La Memoria de una Ciudad</span>
+              <span class="archive-label">Archivo oculto</span>
+            </div>
+          </header>
+
+          <article class="archivo-sequence"
+                   aria-label="Secuencia de apertura del compartimento">
+
+            <!-- ── FASE 1: Los seis diales ── -->
+            <div class="archivo-phase"
+                 id="archivo-phase-1"
+                 data-phase="dials">
+              <header class="archivo-intro">
+                <p class="archive-label">Mecanismo integrado en la cámara</p>
+                <h3 id="archivo-dials-title">Una combinación ya reconstruida</h3>
+                <p>
+                  Ajusta cada rueda con las flechas del teclado, la rueda del mouse
+                  o un gesto vertical. La combinación ya fue reunida en los
+                  testimonios, pero el gesto de ingresarla debe hacerse rueda por
+                  rueda.
+                </p>
+              </header>
+
+              <div class="dial-mechanism"
+                   role="group"
+                   aria-labelledby="archivo-dials-title"
+                   aria-describedby="dial-instructions dial-status">
+                <div class="camera-mechanism">
+                  <div class="camera-mechanism__body">
+
+                    <!--
+                      Cada dial es un spinbutton accesible.
+                      archivo.js controla el giro con teclado/ratón/touch.
+                      El estado correcto es data-digit="1/9/6/2/4/7".
+                    -->
+                    <div class="camera-mechanism__dials" id="camera-dials">
+                      <div class="camera-dial-group"
+                           role="group"
+                           aria-label="Primer grupo: 196">
+                        <div class="camera-dial" data-position="0"
+                             role="spinbutton"
+                             aria-label="Dial 1 de 6"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="9"
+                             tabindex="0">0</div>
+                        <div class="camera-dial" data-position="1"
+                             role="spinbutton"
+                             aria-label="Dial 2 de 6"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="9"
+                             tabindex="0">0</div>
+                        <div class="camera-dial" data-position="2"
+                             role="spinbutton"
+                             aria-label="Dial 3 de 6"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="9"
+                             tabindex="0">0</div>
+                      </div>
+
+                      <span class="camera-dial-separator" aria-hidden="true">·</span>
+
+                      <div class="camera-dial-group"
+                           role="group"
+                           aria-label="Segundo grupo: 247">
+                        <div class="camera-dial" data-position="3"
+                             role="spinbutton"
+                             aria-label="Dial 4 de 6"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="9"
+                             tabindex="0">0</div>
+                        <div class="camera-dial" data-position="4"
+                             role="spinbutton"
+                             aria-label="Dial 5 de 6"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="9"
+                             tabindex="0">0</div>
+                        <div class="camera-dial" data-position="5"
+                             role="spinbutton"
+                             aria-label="Dial 6 de 6"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="9"
+                             tabindex="0">0</div>
+                      </div>
+                    </div>
+
+                    <div class="camera-mechanism__hatch"
+                         id="camera-hatch"
+                         data-state="closed"
+                         aria-hidden="true">
+                    </div>
+                  </div>
+                </div>
+
+                <p class="archivo-instructions"
+                   id="dial-instructions">
+                  En cada dial: flecha arriba aumenta, flecha abajo disminuye.
+                  Ingresa manualmente 1 · 9 · 6 · 2 · 4 · 7.
+                </p>
+
+                <p class="archivo-status archive-label"
+                   aria-live="polite"
+                   aria-atomic="true"
+                   id="dial-status">
+                  Gira los diales para ingresar la combinación.
+                </p>
+              </div>
+            </div>
+
+            <!-- ── FASE 2: El compartimento se abre ── -->
+            <div class="archivo-phase"
+                 id="archivo-phase-2"
+                 data-phase="opening"
+                 tabindex="-1"
+                 hidden>
+              <div class="compartimento-open"
+                   aria-labelledby="compartimento-title">
+                <header class="compartimento-open__header">
+                  <p class="archive-label">Contenido del compartimento</p>
+                  <h3 id="compartimento-title">Dos objetos, todavía cerrados</h3>
+                </header>
+
+                <div class="compartimento-objects">
+                  <!-- El segundo rollo, todavía sellado -->
+                  <figure class="film-canister">
+                    <div class="film-canister__body"
+                         role="img"
+                         aria-label="Segundo rollo fotográfico de 35 milímetros, todavía sellado">
+                      <div class="film-canister__cap film-canister__cap--top"
+                           aria-hidden="true"></div>
+                      <div class="film-canister__label">
+                        <span class="archive-label">35 mm · Sellado</span>
+                      </div>
+                      <div class="film-canister__cap film-canister__cap--bottom"
+                           aria-hidden="true"></div>
+                    </div>
+                    <figcaption class="archive-label">Segundo rollo</figcaption>
+                  </figure>
+
+                  <!-- El sobre permanece cerrado hasta su momento posterior. -->
+                  <figure class="sobre-sellado"
+                          id="sobre-gabriel">
+                    <div class="sobre-sellado__envelope"
+                         role="img"
+                         aria-label="Sobre cerrado encontrado junto al segundo rollo">
+                      <div class="sobre-sellado__flap" aria-hidden="true"></div>
+                    </div>
+                    <figcaption class="archive-label">Sobre cerrado</figcaption>
+                  </figure>
+                </div>
+
+                <p class="prose">
+                  Dentro hay un segundo rollo sellado y un sobre cerrado. Valeria
+                  fotografía el compartimento y registra el proceso antes de retirar
+                  los objetos.
+                </p>
+              </div>
+            </div>
+
+          </article>
+        </div><!-- /.branch__inner -->
+      </aside>
+      <!-- FIN RAMA · EL COMPARTIMENTO ─────────────── -->
+
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 09 · GABRIEL MEDINA · LA LIBRETA
+         Tipo: branch-node → libreta
+         Biblioteca vecinal del Centro · La Memoria de una Ciudad
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-gabriel"
+      class="beat beat--branch-node"
+      data-beat="gabriel"
+      data-type="branch-node"
+      data-branch="libreta"
+      aria-label="Gabriel Medina · La libreta · La Memoria de una Ciudad"
+    >
+      <h2 class="sr-only">La libreta de Gabriel Medina</h2>
+
+      <div class="beat__content">
+        <p class="act-marker">El archivo de Gabriel</p>
+        <div class="prose">
+          <p>
+            Antes de revelar el segundo rollo, Valeria quiere entender mejor quién
+            era Gabriel. La respuesta llega por la misma comunidad que siguió la
+            investigación: alguien recuerda que un fotógrafo llamado Gabriel Medina
+            dejó materiales en una biblioteca vecinal del Centro. Entre papeles
+            antiguos aparece una caja con su nombre: una libreta de tapa marrón
+            con el título <strong>La Memoria de una Ciudad.</strong>
+          </p>
+          <p>
+            La biblioteca es pequeña y conserva, sobre todo, recuerdos de vecinos.
+            La caja de Gabriel tampoco parece una colección profesional: reúne
+            fotografías impresas, recortes de periódico, nombres y anotaciones.
+            Son rastros breves sobre las personas que fotografió durante años.
+          </p>
+        </div>
+
+        <!-- Nodo de entrada: Libreta -->
+        <div class="branch-node" data-branch-id="libreta">
+          <div class="branch-node__signal" aria-hidden="true">
+            <span class="branch-node__eyebrow">
+              <span class="archive-label">La libreta de Gabriel</span>
+              <span class="archive-label">Una caja de Gabriel</span>
+            </span>
+            <!-- Preview: el título canónico de la tapa -->
+            <div class="notebook-cover-preview" aria-hidden="true">
+              <span class="handwriting notebook-cover-preview__name">
+                La Memoria de una Ciudad
+              </span>
+            </div>
+          </div>
+          <button
+            class="branch-node__enter"
+            data-branch="libreta"
+            aria-expanded="false"
+            aria-controls="branch-libreta"
+            aria-label="Abrir la libreta de Gabriel Medina"
+          >Abrir la libreta</button>
+        </div>
+      </div>
+
+      <!--
+        ╔═══════════════════════════════════╗
+        ║  LA LIBRETA DE GABRIEL           ║
+        ║  Gabriel Medina                  ║
+        ║  La Memoria de una Ciudad        ║
+        ╚═══════════════════════════════════╝
+        Identidad UI: un cuaderno de trabajo consultado en una biblioteca.
+        La manuscrita se reserva para títulos y anotaciones atribuibles.
+      -->
+      <aside
+        id="branch-libreta"
+        class="branch branch--libreta"
+        data-branch-id="libreta"
+        aria-hidden="true"
+        aria-label="Libreta de Gabriel Medina · La Memoria de una Ciudad"
+        role="complementary"
+        hidden
+      >
+        <div class="branch__inner">
+
+          <header class="branch__header">
+            <button class="branch__close"
+                    data-branch="libreta"
+                    aria-label="Cerrar la libreta y regresar al relato">
+              <span aria-hidden="true">←</span> Regresar
+            </button>
+            <div class="branch__meta">
+              <span class="archive-label">La Memoria de una Ciudad</span>
+              <span class="archive-label"
+                    id="notebook-counter"
+                    aria-live="polite">Portada</span>
+            </div>
+          </header>
+
+          <article class="notebook"
+                   aria-label="Libreta de tapa marrón · Gabriel Medina">
+
+            <!-- PORTADA -->
+            <div class="notebook__cover" id="notebook-cover">
+              <div class="notebook__cover-surface">
+                <div class="notebook__cover-texture" aria-hidden="true"></div>
+                <div class="notebook__cover-text">
+                  <p class="notebook__title handwriting">
+                    La Memoria de una Ciudad
+                  </p>
+                </div>
+              </div>
+              <button id="notebook-open-btn"
+                      class="notebook__open-btn"
+                      aria-label="Abrir la libreta de Gabriel Medina">
+                Abrir
+              </button>
+            </div>
+
+            <!-- PÁGINAS (visibles tras la animación de apertura) -->
+            <div class="notebook__body"
+                 id="notebook-body"
+                 aria-label="Páginas de la libreta"
+                 hidden>
+
+              <!-- PÁGINAS 1–2: Notas de campo densas -->
+              <div class="notebook-spread"
+                   data-spread="1"
+                   role="group"
+                   aria-label="Primera doble página · Personas y lugares">
+                <div class="notebook-page notebook-page--left"
+                     aria-label="Don Ernesto y Lucía">
+                  <div class="page-content">
+                    <p class="page-content__kicker archive-label">Primeras huellas</p>
+                    <section class="notebook-record" aria-labelledby="record-ernesto">
+                      <h3 id="record-ernesto" class="notebook-record__name handwriting">
+                        Ernesto Huanca
+                      </h3>
+                      <p>
+                        Una fotografía acompañada por una descripción del lugar donde
+                        trabajaba y del tiempo que llevaba vinculado a esa zona.
+                      </p>
+                    </section>
+                    <div class="page-clipping"
+                         role="img"
+                         aria-label="Recorte de periódico sobre cambios urbanos en el Centro de Lima">
+                      <p class="page-clipping__headline">
+                        Recorte sobre los cambios del Centro de Lima
+                      </p>
+                      <p class="page-clipping__byline archive-label">
+                        Una noticia doblada entre las páginas
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="notebook-page notebook-page--right"
+                     aria-label="Lucía y la familia Quispe">
+                  <div class="page-content">
+                    <section class="notebook-record" aria-labelledby="record-lucia">
+                      <h3 id="record-lucia" class="notebook-record__name handwriting">
+                        Lucía Fernández
+                      </h3>
+                      <p>
+                        El mural aparece unido al proyecto comunitario y a las
+                        personas que participaron en él.
+                      </p>
+                    </section>
+                    <section class="notebook-record" aria-labelledby="record-quispe">
+                      <h3 id="record-quispe" class="notebook-record__name handwriting">
+                        Familia Quispe
+                      </h3>
+                      <p>
+                        La vivienda familiar se registra junto a la historia de las
+                        generaciones que vivieron en ella.
+                      </p>
+                    </section>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PÁGINAS 3–4: La Memoria de una Ciudad + mapa completo protagonista -->
+              <div class="notebook-spread notebook-spread--key"
+                   data-spread="key"
+                   role="group"
+                   aria-label="Segunda doble página · El proyecto y el mapa dibujado a mano">
+                <div class="notebook-page notebook-page--left"
+                   aria-label="La Memoria de una Ciudad">
+                  <div class="page-content">
+                    <h3 class="handwriting page-content__project-title"
+                        id="notebook-project-title">
+                      La Memoria de una Ciudad
+                    </h3>
+                    <p class="page-content__text">
+                      Las páginas reúnen cuánto tiempo llevaba una persona en un lugar,
+                      los negocios que había mantenido y sus recuerdos de una calle.
+                    </p>
+                    <p class="page-content__text">
+                      No forman biografías completas. Al relacionarse, esos rastros
+                      cotidianos construyen la memoria de una ciudad.
+                    </p>
+                    <p class="page-content__marginal">
+                      En las últimas páginas aparece otro mapa. Casi todos sus
+                      puntos tienen nombre y fecha. Uno queda solo con una cruz.
+                    </p>
+                  </div>
+                </div>
+                <div class="notebook-page notebook-page--right notebook-page--map-full"
+                     aria-label="Mapa dibujado a mano a página completa">
+                  <div class="notebook-map notebook-map--full">
+                    <figure class="notebook-map__figure">
+                      <img
+                        id="notebook-map-image"
+                        data-src="assets/images/notebook/mapa-completo.jpg"
+                        alt="Mapa dibujado a mano con nombres y fechas. Una cruz de tinta negra señala el único punto sin nombre."
+                        width="760"
+                        height="520"
+                        decoding="async"
+                      />
+                      <figcaption class="archive-label">
+                        Mapa de Gabriel
+                      </figcaption>
+                    </figure>
+
+                    <div id="notebook-map-status"
+                         class="notebook-map__status"
+                         role="status"
+                         aria-live="polite">
+                      El mapa espera entre estas páginas.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PÁGINAS 5–6: Lectura del mapa y punto sin nombre -->
+              <div class="notebook-spread notebook-spread--review"
+                   data-spread="review"
+                   role="group"
+                   aria-label="Tercera doble página · El punto sin nombre">
+                <div class="notebook-page notebook-page--left"
+                     aria-label="Nombres del mapa">
+                  <div class="notebook-map notebook-map--reading">
+                    <div class="notebook-map__reading"
+                         aria-label="Nombres escritos en el mapa">
+                      <ul>
+                        <li><span>Ernesto Huanca</span><small>La primera voz</small></li>
+                        <li><span>Lucía Fernández</span><small>Mural y proyecto comunitario</small></li>
+                        <li><span>Familia Quispe</span><small>Una casa guardada por generaciones</small></li>
+                        <li class="notebook-map__unnamed">
+                          <span aria-hidden="true">×</span>
+                          <span>Punto sin nombre</span>
+                          <small>Marcado solo con una cruz</small>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button id="notebook-review-point"
+                            class="notebook-map__review"
+                            type="button"
+                            aria-controls="notebook-map-revelation"
+                            aria-expanded="false">
+                      Examinar la cruz sin nombre
+                    </button>
+
+                    <div id="notebook-map-revelation"
+                         class="notebook-map__revelation"
+                         role="status"
+                         tabindex="-1"
+                         hidden>
+                      <p class="handwriting">
+                        La última memoria debe encontrarse por sí sola.
+                      </p>
+                      <p class="notebook-map__completion">
+                        El punto no identifica una persona ni un lugar por escrito.
+                        Valeria tendrá que reconocer la zona para continuar.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="notebook-page notebook-page--right notebook-page--point"
+                     aria-label="Detalle del punto sin nombre">
+                  <div class="page-content">
+                    <p class="page-content__kicker archive-label">Última marca</p>
+                    <h3 class="handwriting page-content__project-title">
+                      Sin nombre
+                    </h3>
+                    <p class="page-content__text">
+                      El mapa no completa la pista con una dirección. La última
+                      marca aparece como una cruz, separada del resto de nombres.
+                    </p>
+                    <p class="page-content__marginal">
+                      No parece un lugar olvidado. Parece una memoria que Gabriel
+                      dejó sin explicación.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /.notebook__body -->
+
+            <!-- Controles de navegación entre páginas -->
+            <nav class="notebook-nav"
+                 aria-label="Navegación entre páginas de la libreta">
+              <button id="notebook-prev"
+                      class="notebook-nav__btn"
+                      aria-label="Página anterior"
+                      disabled>←</button>
+              <span id="notebook-page-label"
+                    class="notebook-nav__label archive-label"
+                    aria-live="polite">Doble página 1 de 2</span>
+              <button id="notebook-next"
+                      class="notebook-nav__btn"
+                      aria-label="Página siguiente">→</button>
+            </nav>
+
+          </article>
+        </div><!-- /.branch__inner -->
+      </aside>
+      <!-- FIN RAMA · LA LIBRETA ───────────────────── -->
+
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 10 · EL MAPA SE COMPLETA
+         Tipo: branch-node → map-col
+         El punto sin nombre · una zona reconocida sin explicación aún
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-mapa-col"
+      class="beat beat--branch-node"
+      data-beat="mapa-col"
+      data-type="branch-node"
+      data-branch="map-col"
+      aria-label="El mapa se completa · El último punto sin nombre"
+    >
+      <h2 class="sr-only">El mapa completo y el último punto sin nombre</h2>
+
+      <div class="beat__content">
+        <p class="act-marker">La última memoria</p>
+        <div class="prose">
+          <p>
+            No es un dato faltante: es una decisión. Gabriel dejó un espacio para que
+            alguien completara la historia con algo propio. Valeria amplía esa zona
+            del mapa, pero no la traduce todavía como una respuesta: decide caminarla
+            antes de revelar el segundo rollo.
+          </p>
+        </div>
+
+        <!-- Nodo de entrada: el último punto -->
+        <div class="branch-node" data-branch-id="map-col">
+          <div class="branch-node__signal" aria-hidden="true">
+            <span class="branch-node__eyebrow">
+              <span class="archive-label">El último punto</span>
+              <span class="archive-label">El mapa se completa</span>
+            </span>
+          </div>
+          <button
+            class="branch-node__enter"
+            data-branch="map-col"
+            aria-expanded="false"
+            aria-controls="branch-map-col"
+            aria-label="Examinar el último punto del mapa de Gabriel"
+          >Examinar el último punto</button>
+        </div>
+      </div>
+
+      <!--
+        ╔═══════════════════════════════════╗
+        ║  EL ÚLTIMO PUNTO                 ║
+        ║  Del mapa a la visita            ║
+        ╚═══════════════════════════════════╝
+        Identidad UI: lectura documental del mapa, reconocimiento de la zona
+        y registro de la visita. Ninguna fase se completa automáticamente.
+      -->
+      <aside
+        id="branch-map-col"
+        class="branch branch--map-col"
+        data-branch-id="map-col"
+        aria-hidden="true"
+        aria-label="Verificación del mapa completo · El último punto sin nombre"
+        role="complementary"
+        hidden
+      >
+        <div class="branch__inner">
+
+          <header class="branch__header">
+            <button class="branch__close"
+                    data-branch="map-col"
+                    aria-label="Cerrar el mapa y regresar al relato">
+              <span aria-hidden="true">←</span> Regresar
+            </button>
+            <div class="branch__meta">
+              <span class="archive-label">La Memoria de una Ciudad</span>
+              <span class="archive-label"
+                    id="map-col-status"
+                    aria-live="polite">Una marca todavía sola</span>
+            </div>
+          </header>
+
+          <article class="map-col-explorer"
+                   aria-label="Recorrido del último punto del mapa de Gabriel Medina">
+
+            <section class="map-col-phase map-col-phase--map"
+                     id="map-col-phase-map"
+                     aria-labelledby="map-col-map-title">
+              <div class="map-col-phase__intro">
+                <p class="archive-label">La última marca del mapa</p>
+                <h3 id="map-col-map-title">Una cruz sin nombre</h3>
+                <p>
+                  Los registros de Ernesto, Lucía y la familia Quispe coinciden
+                  con el mapa reconstruido por Valeria. La última cruz no tiene
+                  un nombre escrito junto a ella.
+                </p>
+              </div>
+
+              <figure class="map-col__canvas"
+                      aria-label="Mapa con tres recuerdos conocidos y una cruz sin nombre">
+                <div class="map-col__surface">
+                  <img
+                    src="svg/map-base.svg"
+                    alt="Mapa dibujado del Centro de Lima con tres puntos ya reconocidos y una cruz sin nombre"
+                    width="900"
+                    height="620"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div class="map-col__points"
+                       id="map-col-points"
+                       role="list"
+                       aria-label="Marcas del mapa"></div>
+                </div>
+                <figcaption>
+                  Valeria no sigue una dirección exacta. Sigue una insistencia.
+                </figcaption>
+              </figure>
+
+              <button id="map-col-inspect"
+                      class="map-col-action"
+                      type="button"
+                      aria-controls="map-col-phase-recognition"
+                      aria-expanded="false">
+                Ampliar la cruz sin nombre
+              </button>
+            </section>
+
+            <section class="map-col-phase map-col-phase--recognition"
+                     id="map-col-phase-recognition"
+                     tabindex="-1"
+                     aria-labelledby="map-col-recognition-title"
+                     hidden>
+              <p class="archive-label">Ubicación aproximada · Centro de Lima</p>
+              <h3 id="map-col-recognition-title">Una zona que Valeria ya conoce</h3>
+              <p>
+                Al ampliar ese sector, Valeria reconoce las calles de sus recorridos
+                infantiles: la misma zona por donde su abuela la llevaba de niña.
+                Todavía no sabe qué relación tiene ese lugar con Gabriel.
+              </p>
+              <blockquote class="map-col__echo handwriting">
+                La última memoria debe encontrarse por sí sola.
+              </blockquote>
+              <button id="map-col-follow"
+                      class="map-col-action"
+                      type="button"
+                      aria-controls="map-col-phase-visit"
+                      aria-expanded="false">
+                Seguir la ubicación aproximada
+              </button>
+            </section>
+
+            <section class="map-col-phase map-col-phase--visit"
+                     id="map-col-phase-visit"
+                     tabindex="-1"
+                     aria-labelledby="map-col-visit-title"
+                     hidden>
+              <p class="archive-label">El lugar al que vuelve la memoria</p>
+              <h3 id="map-col-visit-title">Una vivienda modificada con los años</h3>
+              <div class="map-col-visit__text">
+                <p>
+                  Antes de abrir el segundo rollo, Valeria llega a una vereda frente
+                  a una vivienda modificada con el tiempo. No hay una señal especial
+                  que la distinga de cualquier otro lugar.
+                </p>
+                <p>
+                  Toma fotografías y compara los detalles con la libreta. La anotación
+                  no identifica un edificio ni una persona: solo una memoria que
+                  todavía no tiene nombre.
+                </p>
+              </div>
+              <dl class="map-col-visit__record">
+                <div>
+                  <dt>De dónde viene</dt>
+                  <dd>Mapa de la libreta de Gabriel</dd>
+                </div>
+                <div>
+                  <dt>Marca</dt>
+                  <dd>Cruz sin nombre</dd>
+                </div>
+                <div>
+                  <dt>Lo que hace Valeria</dt>
+                  <dd>Visita, fotografía y comparación</dd>
+                </div>
+              </dl>
+              <button id="map-col-complete"
+                      class="map-col-action map-col-action--complete"
+                      type="button"
+                      aria-controls="map-col-completion"
+                      aria-expanded="false">
+                Registrar la visita y volver al laboratorio
+              </button>
+              <div id="map-col-completion"
+                   class="map-col-completion"
+                   role="status"
+                   tabindex="-1"
+                   hidden>
+                <p>La visita quedó registrada. El segundo rollo sigue sellado hasta el regreso al laboratorio.</p>
+              </div>
+            </section>
+
+          </article>
+        </div><!-- /.branch__inner -->
+      </aside>
+      <!-- FIN RAMA · EL ÚLTIMO PUNTO ─────────────── -->
+
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 11 · LA ÚLTIMA MEMORIA
+         Tipo: prose · revelación personal
+         Las calles que su abuela le enseñó
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-brena"
+      class="beat beat--prose beat--revelation"
+      data-beat="brena"
+      data-type="prose"
+      aria-label="De vuelta al laboratorio · Primeras imágenes del segundo rollo"
+    >
+      <h2 class="sr-only">Las primeras imágenes del segundo rollo</h2>
+
+      <div class="beat__content">
+        <!--
+          El tono visual cambia aquí: la paleta se calienta,
+          el ritmo del texto se ralentiza, el espacio vacío aumenta.
+          Esta es la transición de investigación externa a memoria personal.
+        -->
+        <div class="prose prose--revelation">
+          <p>
+            Después de visitar el último punto, Valeria vuelve al laboratorio.
+            Solo entonces abre y revela el segundo rollo que encontró dentro de
+            la cámara.
+          </p>
+          <p>
+            Las primeras imágenes se parecen a las del primer rollo: una calle,
+            un parque y personas caminando. Por ahora, nada explica por qué el mapa
+            la condujo hasta una zona de su infancia.
+          </p>
+        </div>
+
+        <details class="second-roll-preview">
+          <summary>Revisar las primeras imágenes</summary>
+          <div class="contact-sheet contact-sheet--brena"
+               role="list"
+               aria-label="Primeras fotografías del segundo rollo">
+            <figure class="contact-frame contact-frame--aged"
+                    role="listitem"
+                    data-index="1">
+              <img
+                data-src="assets/images/segundo-rollo/barrio-01.jpg"
+                alt="Primera fotografía cotidiana del segundo rollo: una calle."
+                width="300"
+                height="400"
+                loading="lazy"
+                decoding="async"
+                class="reveal-target"
+              />
+              <figcaption>Una calle · segundo rollo</figcaption>
+            </figure>
+            <figure class="contact-frame contact-frame--aged"
+                    role="listitem"
+                    data-index="2">
+              <img
+                data-src="assets/images/segundo-rollo/barrio-02.jpg"
+                alt="Segunda fotografía cotidiana del segundo rollo: un parque con personas caminando."
+                width="300"
+                height="400"
+                loading="lazy"
+                decoding="async"
+                class="reveal-target"
+              />
+              <figcaption>Un parque y personas caminando · segundo rollo</figcaption>
+            </figure>
+          </div>
+          <p class="second-roll-preview__pause">
+            Entre los fotogramas queda una imagen más por observar con detenimiento.
+          </p>
+          <button
+            class="second-roll-preview__continue"
+            id="second-roll-review"
+            type="button"
+            aria-controls="beat-nina beat-nota beat-cierre">
+            Observar el último fotograma
+          </button>
+          <p class="second-roll-preview__status"
+             id="second-roll-review-status"
+             role="status"
+             aria-live="polite"></p>
+        </details>
+      </div>
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 12 · EL LABORATORIO · LA NIÑA
+         Tipo: climax
+         El segundo rollo · el reconocimiento
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-nina"
+      class="beat beat--climax"
+      data-beat="nina"
+      data-type="climax"
+      tabindex="-1"
+      aria-label="El laboratorio · El segundo rollo · El reconocimiento"
+    >
+      <h2 class="sr-only">El reconocimiento</h2>
+
+      <div class="beat__content">
+        <!--
+          LA FOTOGRAFÍA REVELACIÓN: la niña, fotografiada sin mirar a la cámara.
+          Elemento único, aislado, sin contexto visual alrededor.
+          El silencio antes de que aparezca es parte del diseño.
+          reveal-target--climax tiene una cadencia más lenta que las demás.
+        -->
+        <figure class="climax-image" id="photo-nina"
+                aria-label="La fotografía que cambia el sentido de toda la investigación">
+          <div class="climax-image__frame">
+            <img
+              data-src="assets/images/segundo-rollo/nina-valeria.jpg"
+              alt="Una niña jugando en una vereda, fotografiada desde cierta distancia, sin mirar a la cámara. La forma de la calle y la casa al fondo resultan familiares."
+              width="680" height="900"
+              loading="lazy"
+              decoding="async"
+              class="reveal-target reveal-target--climax"
+            />
+          </div>
+          <p class="climax-image__fallback prose"
+             id="nina-valeria-fallback"
+             hidden>
+            La fotografía no aparece en pantalla, pero el hallazgo permanece:
+            Valeria reconoce a una niña en una calle familiar.
+          </p>
+          <figcaption class="climax-image__caption prose">
+            <p>
+              Era ella. Una versión suya, de una edad que apenas recuerda,
+              fotografiada en un momento cualquiera de una tarde cualquiera, en
+              las mismas calles por las que después caminaría siguiendo sus
+              propias pistas.
+            </p>
+          </figcaption>
+        </figure>
+
+      </div>
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 13 · LA NOTA DE GABRIEL
+         Tipo: quote
+         La anotación final de la libreta · el sobre del compartimento
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-nota"
+      class="beat beat--quote"
+      data-beat="nota"
+      data-type="quote"
+      aria-label="La nota de Gabriel Medina · El sobre del compartimento"
+    >
+      <h2 class="sr-only">La nota de Gabriel Medina</h2>
+
+      <div class="beat__content beat__content--centered">
+
+        <div class="prose prose--pre-climax">
+          <p>
+            En la libreta encuentra una última anotación, sin nombre ni dirección:
+            Gabriel escribió que algunas personas pasan años buscando historias sin
+            darse cuenta de que también forman parte de ellas. Entonces recuerda el
+            sobre que quedó guardado dentro de la cámara, todavía sin abrir.
+          </p>
+        </div>
+
+        <!--
+          Animación de apertura del sobre (el mismo que apareció en el compartimento).
+          sobre-open.js (parte de archivo.js) lo abre con una transición de flap.
+          La nota emerge debajo, letra a letra, con reveal.text().
+        -->
+        <div class="sobre-open" id="sobre-open-sequence" aria-hidden="true">
+          <div class="sobre-open__envelope">
+            <div class="sobre-open__flap"></div>
+          </div>
+        </div>
+
+        <figure class="nota-gabriel">
+          <blockquote class="nota-gabriel__quote">
+            <p class="nota-gabriel__line reveal-target"
+               data-reveal-delay="0">
+              Las ciudades no están hechas de edificios,
+            </p>
+            <p class="nota-gabriel__line reveal-target"
+               data-reveal-delay="1400">
+              sino de las historias que se decide recordar.
+            </p>
+          </blockquote>
+          <figcaption class="nota-gabriel__attribution">
+            <cite class="archive-label">
+              Gabriel Medina · Nota encontrada dentro del compartimento de la cámara
+            </cite>
+          </figcaption>
+        </figure>
+
+      </div>
+    </section>
+
+
+    <!-- ████████████████████████████████████████████
+         BEAT 14 · EL ARCHIVO ABIERTO
+         Tipo: resolution
+         El documental · la plataforma · la línea de cierre
+    ████████████████████████████████████████████ -->
+    <section
+      id="beat-cierre"
+      class="beat beat--resolution"
+      data-beat="cierre"
+      data-type="resolution"
+      aria-label="El archivo abierto · La Memoria de una Ciudad"
+    >
+      <h2 class="sr-only">El archivo abierto · La Memoria de una Ciudad</h2>
+
+      <div class="beat__content">
+        <p class="act-marker">La ciudad recuerda</p>
+
+        <div class="prose prose--resolution">
+          <p>
+            Valeria entiende entonces que Gabriel nunca buscó fotografiar
+            desconocidos al azar. Había estado armando, durante años, el retrato
+            de una ciudad completa, hecha de personas y momentos que normalmente
+            desaparecen sin que nadie los registre — y que, sin saberlo, ella misma
+            había sido parte de ese retrato mucho antes de encontrar la cámara.
+          </p>
+          <p>
+            En las semanas siguientes organiza todo el material: las fotografías
+            digitalizadas, los testimonios de Don Ernesto, Lucía y la Familia Quispe,
+            el mapa de Gabriel convertido en <em>La Memoria de una Ciudad</em>, una
+            plataforma donde cada punto representa una historia. Documenta el proceso
+            en distintos formatos —el recorrido en Instagram, las voces en un podcast,
+            el lado más cercano del trabajo en videos cortos— y al final deja un
+            espacio abierto para que otras personas sumen las suyas antes de que
+            también desaparezcan.
+          </p>
+        </div>
+
+        <!-- Llamada a participar -->
+        <div class="resolution-cta"
+             role="region"
+             aria-label="Convocatoria al archivo colaborativo">
+          <p class="resolution-cta__prompt prose">
+            Lo que empezó como una tesis sobre una cámara encontrada termina siendo
+            una plataforma donde la ciudad se cuenta a sí misma.
+          </p>
+          <p class="resolution-cta__explain prose">
+            La invitación queda abierta: proponer un recuerdo, sumar una imagen
+            o una voz, y decidir qué parte de esa memoria puede compartirse.
+          </p>
+          <button class="resolution-cta__btn"
+                  type="button"
+                  aria-label="Agregar tu historia de Lima al archivo La Memoria de una Ciudad">
+            Agregar al archivo
+          </button>
+
+          <form class="archive-contribution"
+                data-contribution-form
+                aria-label="Formulario para sumar un recuerdo al archivo"
+                hidden>
+            <div class="archive-contribution__intro">
+              <h3>Sumar un recuerdo</h3>
+              <p>
+                Este aporte queda guardado como borrador en tu navegador. Puedes
+                descargarlo y conservarlo para una versión conectada del archivo.
+              </p>
+            </div>
+
+            <label class="archive-contribution__field">
+              <span>Tu nombre <small>opcional</small></span>
+              <input name="author"
+                     type="text"
+                     autocomplete="name"
+                     maxlength="80"
+                     placeholder="Nombre o iniciales" />
+            </label>
+
+            <label class="archive-contribution__field">
+              <span>Lugar del recuerdo</span>
+              <input name="place"
+                     type="text"
+                     maxlength="120"
+                     required
+                     placeholder="Calle, plaza, casa, barrio…" />
+            </label>
+
+            <label class="archive-contribution__field">
+              <span>Recuerdo</span>
+              <textarea name="memory"
+                        rows="5"
+                        minlength="20"
+                        maxlength="900"
+                        required
+                        placeholder="Cuenta qué pasó ahí, quién aparece en ese recuerdo y por qué vale la pena guardarlo."></textarea>
+            </label>
+
+            <label class="archive-contribution__field">
+              <span>Archivo de apoyo <small>opcional</small></span>
+              <input name="attachment"
+                     type="file"
+                     accept="image/*,audio/*,video/*,.pdf,.txt" />
+            </label>
+
+            <figure class="archive-contribution__preview"
+                    data-file-preview
+                    hidden>
+              <div class="archive-contribution__preview-media"
+                   data-file-preview-media></div>
+              <figcaption data-file-preview-caption></figcaption>
+            </figure>
+
+            <div class="archive-contribution__actions">
+              <button class="resolution-cta__btn"
+                      type="submit">
+                Guardar borrador
+              </button>
+              <button class="archive-contribution__ghost"
+                      type="button"
+                      data-export-contribution
+                      disabled>
+                Descargar aporte
+              </button>
+            </div>
+
+            <p class="resolution-cta__status prose"
+               data-contribution-status
+               role="status"
+               tabindex="-1"></p>
+          </form>
+        </div>
+
+        <!-- La línea de cierre: el párrafo final de la historia -->
+        <footer class="beat__footer">
+          <p class="closing-line prose">
+            La cámara había llegado a sus manos por casualidad.
+            La memoria que contenía nunca había sido solo de Gabriel.
+          </p>
+          <div class="closing-meta" aria-hidden="true">
+            <span class="archive-label">La Memoria de una Ciudad · Lima</span>
+            <span class="archive-label">
+              Archivo abierto · <time datetime="20XX">20XX</time> — presente
+            </span>
+          </div>
+        </footer>
+
+      </div>
+
+    </section>
+
+
+  </main><!-- /#spine -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCRIPTS
+       Diferidos al final del body: no bloquean el primer pintado.
+       GSAP y Lenis cargan primero (CDN); main.js como ES Module después.
+  ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- GSAP core -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+    defer
+  ></script>
+  <!-- GSAP ScrollTrigger (se registra en scroll.js con gsap.registerPlugin) -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
+    defer
+  ></script>
+  <!-- Lenis: scroll suave cinemático, sincronizado con GSAP en scroll.js -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"
+    defer
+  ></script>
+
+  <!-- Entry point: importa y arranca state, scroll, reveal, spine, fishbone -->
+  <script type="module" src="js/main.js?v=ernesto-sync-2"></script>
+
+</body>
+</html>

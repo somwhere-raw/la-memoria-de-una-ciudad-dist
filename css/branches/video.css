@@ -1,0 +1,275 @@
+/*
+ * BRANCHES/VIDEO.CSS
+ * La Memoria de una Ciudad — Familia Quispe
+ *
+ * Identidad: registro de visita y documento familiar. La composición pertenece
+ * al acto de investigación comunitaria: papel claro, tinta oscura y acento
+ * petróleo. No imita TikTok, película ni material encontrado.
+ */
+
+.video-player {
+  display:        flex;
+  flex-direction: column;
+  gap:            clamp(2.5rem, 6vw, 5rem);
+  color:          var(--p4-ink);
+}
+
+.video-intro {
+  max-width: 760px;
+  padding-left: clamp(1rem, 2vw, 1.75rem);
+  border-left: 1px solid var(--p4-petrol);
+}
+
+.video-intro h3 {
+  max-width:      14ch;
+  margin:         var(--space-3) 0 var(--space-5);
+  font-family:    var(--font-display);
+  font-size:      clamp(2.2rem, 5vw, 4.75rem);
+  font-weight:    var(--weight-regular);
+  line-height:    0.98;
+  letter-spacing: var(--tracking-tight);
+  color:          var(--p4-ink);
+}
+
+.video-intro > p:last-child {
+  max-width:   60ch;
+  margin:      0;
+  font-size:   var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color:       var(--p4-ink);
+}
+
+.video-layout {
+  display:               grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.7fr);
+  align-items:           start;
+  gap:                   clamp(2rem, 5vw, 5rem);
+}
+
+.video-record,
+.video-document {
+  min-width: 0;
+}
+
+.video-container {
+  width:      100%;
+  margin:     0;
+  background: var(--p4-paper-clear);
+  border:     1px solid color-mix(in srgb, var(--p4-ink) 18%, transparent);
+  box-shadow: 0 18px 48px rgb(36 33 28 / 10%);
+}
+
+.video-player__el {
+  display:      block;
+  width:        100%;
+  max-height:   min(68vh, 680px);
+  aspect-ratio: 16 / 9;
+  object-fit:   contain;
+  background:   #171613;
+}
+
+.video-player__el[hidden] {
+  display: none;
+}
+
+.video-caption {
+  margin:         0;
+  padding:        var(--space-4) var(--space-5);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  line-height:    var(--leading-relaxed);
+  letter-spacing: var(--tracking-wide);
+  color:          #5f5146;
+}
+
+.video-resource-status {
+  margin:      var(--space-4) 0 0;
+  padding:     var(--space-5);
+  color:       var(--p4-ink);
+  line-height: var(--leading-relaxed);
+  background:  color-mix(in srgb, var(--p4-petrol) 7%, var(--p4-paper-clear));
+  border-left: 3px solid var(--p4-petrol);
+}
+
+.video-resource-status[hidden] {
+  display: none;
+}
+
+.video-document {
+  padding:     clamp(1.5rem, 3vw, 2.5rem);
+  background:  var(--p4-paper-clear);
+  border-top:  3px solid var(--p4-petrol);
+  box-shadow:  0 12px 36px rgb(36 33 28 / 8%);
+}
+
+.video-document h4 {
+  margin:      var(--space-3) 0 var(--space-5);
+  font-family: var(--font-display);
+  font-size:   clamp(1.8rem, 3vw, 2.75rem);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color:       var(--p4-ink);
+}
+
+.video-document > p:not(.archive-label) {
+  margin:      0;
+  line-height: var(--leading-relaxed);
+  color:       var(--p4-ink);
+}
+
+.video-document__review {
+  min-height:     46px;
+  margin-top:     var(--space-7);
+  padding:        var(--space-3) var(--space-5);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color:          var(--p4-petrol);
+  border:         1px solid color-mix(in srgb, var(--p4-petrol) 58%, transparent);
+  transition:
+    color        var(--dur-fast) var(--ease-out-soft),
+    background   var(--dur-fast) var(--ease-out-soft),
+    border-color var(--dur-fast) var(--ease-out-soft);
+}
+
+.video-document__review:hover {
+  color:        var(--p4-ink);
+  background:   color-mix(in srgb, var(--p4-petrol) 8%, transparent);
+  border-color: var(--p4-petrol);
+}
+
+.video-document__review:focus-visible,
+.video-evidence:focus-visible {
+  outline:        3px solid var(--p4-petrol);
+  outline-offset: 4px;
+}
+
+.video-evidence {
+  align-self:     center;
+  width:          min(100%, 620px);
+  margin:         0 auto;
+  opacity:        0;
+  transform:      translateY(16px);
+  pointer-events: none;
+  transition:
+    opacity   var(--dur-reveal) var(--ease-develop),
+    transform var(--dur-reveal) var(--ease-develop);
+}
+
+.video-evidence[hidden] {
+  display: none;
+}
+
+.video-evidence.is-revealed {
+  opacity:        1;
+  transform:      translateY(0);
+  pointer-events: auto;
+}
+
+.video-evidence .letter-paper {
+  width:      100%;
+  padding:    clamp(2rem, 6vw, 4.5rem);
+  color:      var(--p4-ink);
+  background: var(--p4-paper-clear);
+  border:     1px solid color-mix(in srgb, var(--p4-ink) 16%, transparent);
+  box-shadow: var(--shadow-evidence);
+}
+
+.video-evidence .letter-paper__fold {
+  position:   absolute;
+  top:        36%;
+  right:      0;
+  left:       0;
+  width:      auto;
+  height:     1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--p4-ink) 24%, transparent) 12%,
+    color-mix(in srgb, var(--p4-ink) 24%, transparent) 88%,
+    transparent
+  );
+}
+
+.video-evidence .letter-paper::after {
+  content:    "";
+  position:   absolute;
+  top:        70%;
+  right:      0;
+  left:       0;
+  height:     1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--p4-ink) 18%, transparent) 12%,
+    color-mix(in srgb, var(--p4-ink) 18%, transparent) 88%,
+    transparent
+  );
+}
+
+.video-evidence .letter-paper__body {
+  position: relative;
+  z-index:  1;
+}
+
+.video-evidence .letter-paper__meta {
+  margin: 0;
+}
+
+.video-evidence .letter-paper__numbers {
+  margin:         clamp(2.5rem, 7vw, 5rem) 0;
+  font-size:      clamp(4.5rem, 14vw, 9rem);
+  line-height:    0.9;
+  letter-spacing: var(--tracking-wide);
+  text-align:     right;
+  color:          var(--p4-ink);
+}
+
+.video-evidence__caption {
+  max-width:   54ch;
+  margin:      var(--space-6) auto 0;
+  font-size:   var(--text-md);
+  line-height: var(--leading-relaxed);
+  text-align:  center;
+  color:       #5f5146;
+}
+
+@media (max-width: 900px) {
+  .video-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .video-document {
+    width: min(100%, 660px);
+  }
+}
+
+@media (max-width: 520px) {
+  .video-intro {
+    padding-left: var(--space-4);
+  }
+
+  .video-intro h3 {
+    font-size: clamp(2.1rem, 12vw, 3.25rem);
+  }
+
+  .video-document {
+    padding: var(--space-5);
+  }
+
+  .video-document__review {
+    width: 100%;
+  }
+
+  .video-caption {
+    padding-inline: var(--space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video-document__review,
+  .video-evidence {
+    transition-duration: 0.01ms;
+  }
+}

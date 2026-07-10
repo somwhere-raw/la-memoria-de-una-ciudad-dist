@@ -1,0 +1,508 @@
+/*
+ * BRANCHES/PODCAST.CSS
+ * La Memoria de una Ciudad — Rama 01: Don Ernesto Huanca
+ *
+ * Identidad UI: registro de campo sobrio.
+ * Elementos: metadatos de dos encuentros, onda de audio, transcripción
+ * sincronizada con notas de escucha y evidencia física 1·9·6.
+ */
+
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTENEDOR PRINCIPAL
+═══════════════════════════════════════════════════════════════ */
+
+.podcast-player {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-10);
+  width:          min(100%, 900px);
+  margin-inline:  auto;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   CABECERA DEL REGISTRO
+═══════════════════════════════════════════════════════════════ */
+
+.podcast-intro {
+  display:      grid;
+  gap:          var(--space-4);
+  padding-left: clamp(1rem, 3vw, 2rem);
+  border-left:  1px solid var(--color-ocre-evidencia);
+}
+
+.podcast-intro h3 {
+  max-width:   15ch;
+  margin:      0;
+  color:       var(--color-papel-calido);
+  font-family: var(--font-serif);
+  font-size:   clamp(2.2rem, 6vw, 4.8rem);
+  font-weight: 400;
+  line-height: 0.98;
+}
+
+.podcast-intro > p:not(.archive-label) {
+  max-width:   62ch;
+  margin:      0;
+  color:       var(--color-lino-linea);
+  font-family: var(--font-serif);
+  font-size:   var(--text-md);
+  line-height: var(--leading-relaxed);
+}
+
+.podcast-recording-meta {
+  display:               grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:                   var(--space-4);
+  margin-top:            var(--space-4);
+  padding-block:         var(--space-4);
+  border-block:          1px solid var(--color-gris-medio);
+  color:                 var(--color-lino-linea);
+  font-family:           var(--font-mono);
+  font-size:             var(--text-xs);
+  line-height:           var(--leading-normal);
+  text-transform:        uppercase;
+}
+
+.podcast-recording-meta strong {
+  display:       block;
+  margin-bottom: 0.2rem;
+  color:         var(--color-sepia-tinta);
+  font-weight:   400;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   WAVEFORM ANALÓGICA
+   El SVG es generado por podcast.js al cargar el audio.
+   Aquí definimos su contenedor y aspecto visual.
+   Es una línea continua con leve irregularidad orgánica —
+   no las barras simétricas de los reproductores digitales.
+═══════════════════════════════════════════════════════════════ */
+
+.podcast-waveform {
+  width:          100%;
+  height:         64px;
+  position:       relative;
+  overflow:       hidden;
+  border-block:   1px solid var(--color-gris-carbon);
+  transition:     opacity var(--dur-fast) var(--ease-out-soft);
+}
+
+.podcast-waveform.is-unavailable {
+  opacity: 0.45;
+}
+
+/* El SVG inyectado por podcast.js hereda estos estilos */
+.podcast-waveform svg {
+  width:   100%;
+  height:  100%;
+  display: block;
+}
+
+.podcast-waveform .waveform-track {
+  stroke:         var(--color-gris-medio);
+  stroke-width:   1.5;
+  fill:           none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.podcast-waveform .waveform-progress {
+  stroke:         var(--color-ocre-evidencia);
+  stroke-width:   1.5;
+  fill:           none;
+  stroke-linecap: round;
+  /* El clip-path se actualiza por podcast.js en tiempo real */
+  clip-path:      inset(0 100% 0 0);
+  transition:     clip-path 0.1s linear;
+}
+
+/* Marcador de momento clave: aparece en el timestamp del papel doblado */
+.waveform-marker {
+  position:   absolute;
+  top:        0;
+  bottom:     0;
+  width:      1px;
+  background: var(--color-ocre-evidencia);
+  opacity:    0;
+  transition: opacity var(--dur-normal) var(--ease-out-soft);
+}
+
+.waveform-marker.is-visible {
+  opacity: 0.7;
+}
+
+.waveform-marker::after {
+  content:          '';
+  position:         absolute;
+  top:              -4px;
+  left:             -3px;
+  width:            7px;
+  height:           7px;
+  border-radius:    50%;
+  background:       var(--color-ocre-evidencia);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTROLES DEL REPRODUCTOR
+═══════════════════════════════════════════════════════════════ */
+
+.podcast-controls {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-4);
+  min-width:   0;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-gris-carbon);
+}
+
+/* Botón play/pause */
+.podcast-controls__play {
+  flex-shrink:    0;
+  width:          40px;
+  height:         40px;
+  border-radius:  50%;
+  border:         var(--border-paper);
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  transition:
+    background   var(--dur-fast) var(--ease-out-soft),
+    border-color var(--dur-fast) var(--ease-out-soft);
+}
+
+.podcast-controls__play:hover {
+  background:   var(--color-papel-overlay-05);
+  border-color: var(--color-papel-envejecido);
+}
+
+.podcast-controls__play:disabled {
+  cursor:  not-allowed;
+  opacity: 0.45;
+}
+
+/* El ícono play/pause: se cambia con CSS según data-state */
+.podcast-controls__play-icon {
+  display:       block;
+  width:         0;
+  height:        0;
+  border-style:  solid;
+  border-width:  6px 0 6px 10px;
+  border-color:  transparent transparent transparent var(--color-lino-linea);
+  margin-left:   2px; /* Corrección óptica del triángulo */
+  transition:    border-color var(--dur-fast) var(--ease-out-soft);
+}
+
+/* Estado "playing": ícono de pausa */
+.podcast-controls__play[data-state="playing"] .podcast-controls__play-icon {
+  border-width:  0;
+  width:         10px;
+  height:        12px;
+  border-style:  none;
+  background:    linear-gradient(
+    90deg,
+    var(--color-lino-linea) 0 3px,
+    transparent 3px 7px,
+    var(--color-lino-linea) 7px 10px
+  );
+  margin-left:   0;
+}
+
+/* Timeline */
+.podcast-controls__timeline {
+  flex:          1;
+  min-width:     4rem;
+  position:      relative;
+  height:        24px;
+  display:       flex;
+  align-items:   center;
+}
+
+.podcast-controls__scrubber {
+  width:            100%;
+  height:           2px;
+  border-radius:    var(--radius-pill);
+  background:       var(--color-gris-carbon);
+  cursor:           pointer;
+  position:         relative;
+  z-index:          1;
+}
+
+.podcast-controls__scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width:              10px;
+  height:             10px;
+  border-radius:      50%;
+  background:         var(--color-papel-envejecido);
+  border:             none;
+  cursor:             grab;
+  transition:         transform var(--dur-fast) var(--ease-click);
+}
+
+.podcast-controls__scrubber::-webkit-slider-thumb:active {
+  cursor:    grabbing;
+  transform: scale(1.4);
+}
+
+.podcast-controls__fill {
+  position:      absolute;
+  left:          0;
+  top:           50%;
+  transform:     translateY(-50%);
+  height:        2px;
+  border-radius: var(--radius-pill);
+  background:    var(--color-ocre-evidencia);
+  pointer-events: none;
+  width:         0%; /* Actualizado por podcast.js */
+  transition:    width 0.1s linear;
+}
+
+/* Tiempo transcurrido */
+.podcast-controls__time {
+  flex-shrink:    0;
+  font-size:      var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  opacity:        0.6;
+  min-width:      3.5em;
+  text-align:     right;
+}
+
+.podcast-controls__duration {
+  flex-shrink:    0;
+  margin-left:    calc(var(--space-4) * -0.6);
+  color:          var(--color-lino-linea);
+  font-size:      var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  opacity:        0.6;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   TRANSCRIPCIÓN SINCRONIZADA
+   Las líneas aparecen conforme avanza el audio.
+   Las notas al margen son en Caveat, con orientación de autoría.
+═══════════════════════════════════════════════════════════════ */
+
+.podcast-transcript {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-5);
+  max-height:     min(46vh, 430px);
+  overflow-y:     auto;
+  padding:        var(--space-6);
+  border:         1px solid color-mix(in srgb, var(--p4-ink) 18%, transparent);
+  color:          var(--p4-ink);
+  background:
+    linear-gradient(135deg, var(--p4-paper-clear), var(--p4-paper));
+  box-shadow:     var(--shadow-paper);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--p4-ink) 45%, transparent) transparent;
+  position:       relative;
+}
+
+.podcast-transcript:focus-visible {
+  outline:        3px solid var(--color-ocre-evidencia);
+  outline-offset: 3px;
+}
+
+.transcript-encounter {
+  width:          max-content;
+  max-width:      100%;
+  margin:         var(--space-3) 0 0;
+  padding-bottom: var(--space-2);
+  border-bottom:  1px solid var(--color-ocre-evidencia);
+  color:          var(--p4-petrol);
+}
+
+/* Línea individual de transcripción */
+.transcript-line {
+  display:        flex;
+  gap:            var(--space-8);
+  align-items:    flex-start;
+  width:          100%;
+  padding:        var(--space-3);
+  border-top:     0;
+  border-right:   0;
+  border-bottom:  0;
+  border-left:    3px solid transparent;
+  border-radius:  var(--radius-sm);
+  color:          inherit;
+  background:     transparent;
+  text-align:     left;
+  cursor:         pointer;
+  opacity:        0.72;
+  transition:
+    opacity      var(--dur-slow) var(--ease-out-soft),
+    background   var(--dur-slow) var(--ease-out-soft),
+    border-color var(--dur-slow) var(--ease-out-soft),
+    transform    var(--dur-slow) var(--ease-out-soft);
+  position:       relative;
+}
+
+.transcript-line:hover,
+.transcript-line:focus-visible {
+  opacity: 1;
+  background: color-mix(in srgb, var(--p4-petrol) 9%, transparent);
+}
+
+.transcript-line:focus-visible {
+  outline: 3px solid var(--color-ocre-evidencia);
+  outline-offset: 3px;
+}
+
+/* La línea activa (sincronizada con el audio) */
+.transcript-line.is-active {
+  opacity:      1;
+  border-color: var(--color-ocre-evidencia);
+  background:   color-mix(in srgb, var(--color-ocre-evidencia) 13%, transparent);
+  transform:    translateX(2px);
+}
+
+/* La línea pasada */
+.transcript-line.is-past {
+  opacity: 0.82;
+}
+
+/* El texto de la transcripción */
+.transcript-line__text {
+  flex:        1;
+  font-family: var(--font-serif);
+  font-size:   var(--text-md);
+  line-height: var(--leading-relaxed);
+  color:       var(--p4-ink);
+  margin:      0;
+}
+
+/* El momento clave: el texto del papel */
+.transcript-line[data-key-moment="true"] .transcript-line__text {
+  color:     var(--p4-ink);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+/* Nota al margen */
+.transcript-note {
+  flex-shrink:    0;
+  width:          clamp(120px, 20%, 180px);
+  padding:        var(--space-2) var(--space-3);
+  border-left:    2px solid var(--color-ocre-evidencia);
+  opacity:        0;
+  transform:      translateX(8px);
+  transition:
+    opacity   var(--dur-slow) var(--ease-out-soft) 0.2s,
+    transform var(--dur-slow) var(--ease-out-soft) 0.2s;
+}
+
+.transcript-line.is-active .transcript-note {
+  opacity:   1;
+  transform: translateX(0);
+}
+
+.podcast-transcript.is-static .transcript-line,
+.podcast-transcript.is-static .transcript-note {
+  opacity:   1;
+  transform: none;
+}
+
+.transcript-note__text {
+  font-size:   var(--text-md);
+  line-height: var(--leading-snug);
+  color:       var(--color-tinta-oscura);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   EVIDENCIA FÍSICA: EL PAPEL 1·9·6
+   Aparece al llegar al momento clave de la grabación.
+   reveal.js lo emerge con el efecto de revelado fotográfico.
+═══════════════════════════════════════════════════════════════ */
+
+.podcast-evidence {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  gap:             var(--space-4);
+  /* Estado inicial: oculto hasta que podcast.js lo activa */
+  opacity:         0;
+  transform:       translateY(12px);
+  transition:
+    opacity   var(--dur-reveal) var(--ease-develop),
+    transform var(--dur-reveal) var(--ease-develop);
+}
+
+.podcast-evidence[hidden] {
+  display: none;
+}
+
+.podcast-evidence.is-revealed {
+  opacity:   1;
+  transform: translateY(0);
+}
+
+/* El papel doblado dentro de la evidencia */
+.podcast-evidence .folded-paper {
+  transform:  rotate(-1.5deg);
+  box-shadow:
+    var(--shadow-evidence),
+    0 0 0 1px rgba(242, 235, 217, 0.08);
+}
+
+@media (max-width: 599px) {
+  .podcast-player {
+    gap: var(--space-8);
+  }
+
+  .podcast-intro {
+    padding-left: 1rem;
+  }
+
+  .podcast-intro h3 {
+    font-size: clamp(2.4rem, 13vw, 3.6rem);
+  }
+
+  .podcast-recording-meta {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .podcast-controls {
+    gap: 0.55rem;
+  }
+
+  .podcast-controls__play {
+    width:  44px;
+    height: 44px;
+  }
+
+  .podcast-controls__duration {
+    margin-left: -0.35rem;
+  }
+
+  .podcast-transcript {
+    max-height: 52vh;
+    padding:    var(--space-4);
+  }
+
+  .transcript-line {
+    flex-direction: column;
+    gap:            var(--space-3);
+    padding:        var(--space-3) var(--space-2);
+  }
+
+  .transcript-note {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .podcast-waveform .waveform-progress,
+  .waveform-marker,
+  .transcript-line,
+  .transcript-note,
+  .podcast-evidence {
+    transition-duration: 0.01ms !important;
+  }
+}

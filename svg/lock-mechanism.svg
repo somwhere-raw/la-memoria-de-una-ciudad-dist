@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+  <title>Mecanismo de seis diales del compartimento de la cámara</title>
+
+  <!-- Cuerpo del mecanismo -->
+  <rect x="4" y="18" width="56" height="30" rx="3"
+        fill="#181714" stroke="#3D3A35" stroke-width="1.5" />
+
+  <!-- Los seis diales, en dos grupos de tres -->
+  <g fill="none" stroke="#B07D3A" stroke-width="1.4">
+    <rect x="8"  y="24" width="6" height="18" rx="1.2" />
+    <rect x="15" y="24" width="6" height="18" rx="1.2" />
+    <rect x="22" y="24" width="6" height="18" rx="1.2" />
+
+    <rect x="36" y="24" width="6" height="18" rx="1.2" />
+    <rect x="43" y="24" width="6" height="18" rx="1.2" />
+    <rect x="50" y="24" width="6" height="18" rx="1.2" />
+  </g>
+
+  <!-- Separador entre los dos grupos -->
+  <circle cx="31" cy="33" r="1.4" fill="#B07D3A" opacity="0.8" />
+
+  <!-- Ranura del compartimento, debajo del mecanismo -->
+  <rect x="10" y="50" width="44" height="4" rx="2"
+        fill="none" stroke="#7A5C3A" stroke-width="1" opacity="0.7" />
+
+  <!-- Marca de tensión / clic, arriba del cuerpo -->
+  <path d="M 32,10 L 32,16" stroke="#B07D3A" stroke-width="1.5" stroke-linecap="round" opacity="0.6" />
+  <path d="M 24,12 L 27,17" stroke="#B07D3A" stroke-width="1" stroke-linecap="round" opacity="0.4" />
+  <path d="M 40,12 L 37,17" stroke="#B07D3A" stroke-width="1" stroke-linecap="round" opacity="0.4" />
+</svg>

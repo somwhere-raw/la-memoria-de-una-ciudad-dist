@@ -1,0 +1,9 @@
+Aquí van 3 imágenes de textura, con estos nombres EXACTOS:
+
+  paper-grain.png     -> textura de grano de película (PNG con transparencia,
+                          se repite en mosaico sobre toda la página)
+  aged-paper.jpg       -> textura de papel envejecido
+  tracing-paper.png    -> textura de papel de calco (para el mapa)
+
+Estas son las únicas 3 que pueden ser genéricas / descargadas de un banco
+de texturas gratuito, ya que no son fotografías de la historia.

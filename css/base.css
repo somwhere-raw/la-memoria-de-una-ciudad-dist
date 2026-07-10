@@ -1,0 +1,346 @@
+/*
+ * BASE.CSS
+ * La Memoria de una Ciudad — Base tipográfica y global
+ *
+ * Declaraciones @font-face, estilos de body, clases de utilidad
+ * que se usan en múltiples hojas (prose, archive-label, handwriting,
+ * reveal-target), el grano de film global y el skip link.
+ */
+
+
+/* ═══════════════════════════════════════════════════════════════
+   @FONT-FACE — fuentes autohospedadas
+   Sin dependencia de Google Fonts en producción.
+   font-display: swap → no bloquea el primer pintado.
+═══════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family:   'Lora';
+  src:           url('../assets/fonts/lora/lora-regular.woff2') format('woff2');
+  font-weight:   400;
+  font-style:    normal;
+  font-display:  swap;
+}
+
+@font-face {
+  font-family:   'Lora';
+  src:           url('../assets/fonts/lora/lora-italic.woff2') format('woff2');
+  font-weight:   400;
+  font-style:    italic;
+  font-display:  swap;
+}
+
+@font-face {
+  font-family:   'Lora';
+  src:           url('../assets/fonts/lora/lora-bold.woff2') format('woff2');
+  font-weight:   700;
+  font-style:    normal;
+  font-display:  swap;
+}
+
+@font-face {
+  font-family:   'Inter';
+  src:           url('../assets/fonts/inter/inter-400.woff2') format('woff2');
+  font-weight:   400;
+  font-style:    normal;
+  font-display:  swap;
+}
+
+@font-face {
+  font-family:   'Inter';
+  src:           url('../assets/fonts/inter/inter-500.woff2') format('woff2');
+  font-weight:   500;
+  font-style:    normal;
+  font-display:  swap;
+}
+
+@font-face {
+  font-family:   'Space Mono';
+  src:           url('../assets/fonts/space-mono/space-mono-400.woff2') format('woff2');
+  font-weight:   400;
+  font-style:    normal;
+  font-display:  swap;
+}
+
+@font-face {
+  font-family:   'Space Mono';
+  src:           url('../assets/fonts/space-mono/space-mono-700.woff2') format('woff2');
+  font-weight:   700;
+  font-style:    normal;
+  font-display:  swap;
+}
+
+@font-face {
+  font-family:   'Caveat';
+  src:           url('../assets/fonts/caveat/caveat-400.woff2') format('woff2');
+  font-weight:   400;
+  font-style:    normal;
+  font-display:  swap;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   HTML & BODY
+═══════════════════════════════════════════════════════════════ */
+
+html {
+  font-size: 16px;
+  /* Lenis gestiona el scroll; html y body no deben tener overflow:hidden
+     porque ScrollTrigger necesita leer scroll position del window. */
+}
+
+body {
+  background-color: var(--color-negro-revelador);
+  color:            var(--color-papel-envejecido);
+  font-family:      var(--font-sans);
+  font-size:        var(--text-md);
+  font-weight:      var(--weight-regular);
+  line-height:      var(--leading-normal);
+  min-height:       100vh;
+  position:         relative;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SKIP LINK (accesibilidad)
+═══════════════════════════════════════════════════════════════ */
+
+.skip-link {
+  position:        absolute;
+  top:             var(--space-4);
+  left:            var(--space-4);
+  z-index:         var(--z-skip);
+  padding:         var(--space-2) var(--space-4);
+  background:      var(--color-papel-envejecido);
+  color:           var(--color-negro-revelador);
+  font-family:     var(--font-mono);
+  font-size:       var(--text-xs);
+  letter-spacing:  var(--tracking-wide);
+  text-transform:  uppercase;
+  border-radius:   var(--radius-sm);
+  transform:       translateY(-200%);
+  transition:      transform var(--dur-fast) var(--ease-out-soft);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   TIPOGRAFÍA — ELEMENTOS BASE
+═══════════════════════════════════════════════════════════════ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family:    var(--font-serif);
+  font-weight:    var(--weight-bold);
+  line-height:    var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color:          var(--color-papel-envejecido);
+}
+
+p {
+  font-family: var(--font-serif);
+  font-size:   var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color:       var(--color-papel-calido);
+}
+
+em {
+  font-style: italic;
+  color:      var(--color-papel-envejecido);
+}
+
+strong {
+  font-weight: var(--weight-bold);
+  color:       var(--color-papel-envejecido);
+}
+
+cite {
+  font-style: italic;
+}
+
+time {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* Selección de texto */
+::selection {
+  background-color: var(--color-ocre-sutil);
+  color:            var(--color-papel-envejecido);
+}
+
+/* Scrollbar (Chrome/Edge/Safari) */
+::-webkit-scrollbar {
+  width:  6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-carbon);
+}
+
+::-webkit-scrollbar-thumb {
+  background:    var(--color-gris-carbon);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gris-medio);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   CLASES DE UTILIDAD GLOBAL
+   Usadas en múltiples hojas de estilos y en el HTML directamente.
+═══════════════════════════════════════════════════════════════ */
+
+/* Accesibilidad: oculto visualmente, presente en el árbol de accesibilidad */
+.sr-only {
+  position:   absolute;
+  width:      1px;
+  height:     1px;
+  padding:    0;
+  margin:     -1px;
+  overflow:   hidden;
+  clip:       rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border:     0;
+}
+
+/*
+  PROSE — la voz narrativa de Valeria.
+  Familia Serif, tamaño generoso, interlineado editorial amplio.
+  La clase base; los modificadores (--centered, --tension, etc.)
+  ajustan alineación o color según el beat.
+*/
+.prose {
+  font-family: var(--font-serif);
+  font-size:   var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color:       var(--color-papel-calido);
+  max-width:   var(--prose-width);
+}
+
+.prose p + p {
+  margin-top: var(--space-6);
+}
+
+.prose--centered {
+  margin-inline: auto;
+  text-align:    center;
+}
+
+.prose--after-images {
+  margin-top: var(--space-12);
+}
+
+.prose--after-image {
+  margin-top: var(--space-8);
+}
+
+.prose--tension {
+  font-size:   var(--text-xl);
+  line-height: var(--leading-snug);
+  color:       var(--color-papel-envejecido);
+}
+
+.prose--revelation {
+  font-size:   var(--text-xl);
+  line-height: var(--leading-relaxed);
+  color:       var(--color-papel-envejecido);
+}
+
+.prose--pre-climax {
+  font-size:      var(--text-lg);
+  color:          var(--color-tinta-faint);
+  letter-spacing: var(--tracking-normal);
+}
+
+.prose--resolution {
+  font-size:   var(--text-xl);
+  line-height: var(--leading-relaxed);
+  color:       var(--color-papel-envejecido);
+}
+
+/*
+  ARCHIVE-LABEL — metadatos, evidencia catalogada.
+  Familia Mono, tamaño pequeño, mayúsculas.
+  Diferencia visualmente lo que es NARRACIÓN de lo que es PRUEBA.
+*/
+.archive-label {
+  display:        inline-block;
+  font-family:    var(--font-mono);
+  font-size:      var(--text-sm);
+  font-weight:    var(--weight-regular);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color:          var(--color-tinta-faint);
+}
+
+/*
+  HANDWRITING — la letra de Gabriel Medina.
+  Caveat. SOLO en objetos diegéticos: la libreta, los papeles doblados,
+  los sobres, las cartas. Nunca en la interfaz misma.
+*/
+.handwriting {
+  font-family: var(--font-handwriting);
+  font-size:   var(--text-xl);
+  line-height: var(--leading-snug);
+  color:       var(--color-tinta-oscura);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   REVEAL-TARGET — el efecto de revelado fotográfico
+   La clase que reveal.js busca con querySelectorAll.
+   El estado inicial de toda imagen o bloque que "emerge desde el negro".
+
+   reveal.js animará:
+     - clip-path:  inset(0 100% 0 0) → inset(0 0% 0 0)
+     - filter:     brightness(0.1) saturate(0) → brightness(1) saturate(1)
+
+   El estado CSS define el punto de partida;
+   GSAP lo anima hacia el estado "revelado".
+═══════════════════════════════════════════════════════════════ */
+
+.reveal-target {
+  clip-path:  inset(0 100% 0 0);
+  filter:     brightness(0.1) saturate(0);
+  transition: none; /* GSAP gestiona la animación, no CSS transition */
+  will-change: clip-path, filter;
+}
+
+.reveal-target.is-revealed {
+  clip-path: inset(0 0% 0 0);
+  filter:    brightness(1) saturate(1);
+}
+
+/*
+  Variante para la foto de la niña en el segundo rollo: emergencia más lenta,
+  con un leve calentamiento de color en el final (sepia → color).
+  La duración real la define reveal.js, pero la saturación final es 0.85
+  para que los colores desteñidos del rollo antiguo se preserven.
+*/
+.reveal-target--climax.is-revealed {
+  clip-path: inset(0 0% 0 0);
+  filter:    brightness(1) saturate(0.85);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   FOCUS VISIBLE — foco de teclado editorial
+   Reemplaza el outline azul del browser por uno coherente
+   con la paleta del proyecto.
+═══════════════════════════════════════════════════════════════ */
+
+:focus-visible {
+  outline:        2px solid var(--color-ocre-evidencia);
+  outline-offset: 3px;
+  border-radius:  var(--radius-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}

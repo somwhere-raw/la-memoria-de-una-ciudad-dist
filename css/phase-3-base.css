@@ -1,0 +1,232 @@
+/*
+ * Base técnica de la Fase 3.
+ * Contiene correcciones funcionales y responsive. La dirección visual
+ * definitiva del eje se implementará en la Fase 4.
+ */
+
+/* La ausencia de JavaScript nunca debe ocultar el contenido principal. */
+html:not(.js) .reveal-target {
+  clip-path: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+html.is-branch-open,
+html.is-branch-open body {
+  overflow: hidden;
+}
+
+/* El contenido futuro no existe aún para la interfaz ni para lectores de
+   pantalla. Sin JavaScript, permanece visible como fallback de lectura. */
+.js #beat-mecanismo:not(.is-gate-open),
+.js #beat-codigo:not(.is-gate-open),
+.js #beat-gabriel:not(.is-gate-open),
+.js #beat-mapa-col:not(.is-gate-open),
+.js #beat-brena:not(.is-gate-open),
+.js #beat-nina:not(.is-gate-open),
+.js #beat-nota:not(.is-gate-open),
+.js #beat-cierre:not(.is-gate-open) {
+  display: none !important;
+}
+
+/* Shell funcional de las ramas: viewport completo y scroll propio. */
+.branch.is-open {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-indicator) + 1);
+  width: 100%;
+  max-width: none;
+  height: 100dvh !important;
+  max-height: 100dvh;
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--color-negro-revelador);
+  opacity: 1;
+  pointer-events: auto;
+  scrollbar-gutter: stable;
+}
+
+.branch.is-open .branch__inner {
+  width: min(100% - 2rem, var(--branch-width));
+  min-height: 100%;
+  margin: 0 auto;
+  padding-bottom: max(var(--space-16), env(safe-area-inset-bottom));
+}
+
+.branch.is-open .branch__header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding-top: max(var(--space-4), env(safe-area-inset-top));
+  background: color-mix(in srgb, var(--color-carbon-suave) 94%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.asset-notice {
+  padding: var(--space-4);
+  border: var(--border-ocre);
+  color: var(--color-papel-calido);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.asset-notice p {
+  margin: 0 0 var(--space-3);
+}
+
+.asset-notice__continue {
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  border: 1px solid currentColor;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.asset-notice__continue:focus-visible {
+  outline: 3px solid var(--color-ocre-evidencia);
+  outline-offset: 3px;
+}
+
+.asset-missing {
+  clip-path: none !important;
+  filter: none !important;
+  background: var(--color-gris-carbon);
+}
+
+/* Base responsive: corrige desbordes sin simular aún el rediseño final. */
+@media (max-width: 959px) {
+  :root {
+    --section-pad: clamp(1.5rem, 6vw, 3rem);
+    --branch-gap: clamp(1.25rem, 5vw, 2.5rem);
+    --indicator-offset: var(--space-4);
+  }
+
+  .contact-sheet {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .evidence-table {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-6);
+  }
+
+  .mapa-explorer {
+    grid-template-columns: 1fr;
+  }
+
+  .mapa-detail {
+    position: static;
+    width: 100%;
+  }
+
+  .notebook-spread {
+    grid-template-columns: 1fr;
+  }
+
+  .branch__header {
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .branch__meta {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 599px) {
+  :root {
+    --section-pad: clamp(1.25rem, 6vw, 1.5rem);
+    --branch-gap: 1.25rem;
+    --indicator-width: 28px;
+    --indicator-offset: 0.75rem;
+    --beat-gap: clamp(5rem, 16vh, 8rem);
+  }
+
+  .spine-indicator {
+    right: var(--indicator-offset);
+  }
+
+  .beat__content,
+  .beat__footer {
+    padding-right: calc(var(--indicator-width) + var(--space-4));
+  }
+
+  .beat__content--hero {
+    padding-inline: var(--section-pad);
+  }
+
+  .hero-title {
+    font-size: clamp(3rem, 15vw, 4.5rem);
+    max-width: 8ch;
+  }
+
+  .hero-intro {
+    width: min(100%, 34ch);
+  }
+
+  .contact-sheet {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    gap: var(--space-10);
+  }
+
+  .contact-frame,
+  .contact-frame--aged {
+    width: min(100%, 19rem);
+    margin-inline: auto;
+  }
+
+  .evidence-table {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .evidence-table__connector {
+    transform: rotate(90deg);
+    justify-self: center;
+  }
+
+  .branch.is-open .branch__inner {
+    width: 100%;
+    padding: var(--branch-gap);
+  }
+
+  .branch__header {
+    flex-direction: column;
+  }
+
+  .branch__meta {
+    justify-content: flex-start;
+  }
+
+  .podcast-layout,
+  .video-player,
+  .compartimento-open {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .notebook-spread {
+    display: block;
+  }
+
+  .notebook-page {
+    min-height: auto;
+  }
+
+  .notebook-spread .notebook-page + .notebook-page {
+    margin-top: var(--space-6);
+  }
+
+  .camera-dials {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
