@@ -1,5 +1,0 @@
-Aquí va 1 fotografía (formato .jpg):
-
-  camara.jpg  -> la cámara analógica debajo de la banca del parque
-                 (esta es la imagen principal de portada, así que
-                 conviene que sea la de mejor calidad de todas)
