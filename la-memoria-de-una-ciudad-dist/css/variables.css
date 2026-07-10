@@ -1,0 +1,238 @@
+/*
+ * VARIABLES.CSS
+ * La Memoria de una Ciudad — Sistema de tokens de diseño
+ *
+ * Este archivo es la única fuente de verdad para colores, tipografía,
+ * espaciado, duraciones y curvas de animación.
+ * Ninguna propiedad visual se declara en raw en otras hojas de estilo.
+ */
+
+:root {
+
+  /* ─────────────────────────────────────────────────────
+     PALETA CROMÁTICA
+     Originada en la metáfora del cuarto oscuro y el archivo físico.
+     Documentada en Fase 0: cada color tiene una función narrativa,
+     no decorativa. El carmín solo aparece en el mapa.
+  ───────────────────────────────────────────────────── */
+
+  /* Fondos */
+  --color-negro-revelador:   #0D0C0A;   /* Fondo base global. El cuarto oscuro. */
+  --color-carbon:            #181714;   /* Fondo de secciones alternas del eje */
+  --color-carbon-suave:      #1E1C18;   /* Hover states, fondos de ramas */
+  --color-gris-carbon:       #2C2A27;   /* Encabezados estructurales, bordes fuertes */
+  --color-gris-medio:        #3D3A35;   /* Bordes suaves, divisores */
+  --color-gris-sutil:        #52504A;   /* Placeholders, estados deshabilitados */
+
+  /* Papel y superficie analógica */
+  --color-papel-envejecido:  #F2EBD9;   /* Papel fotográfico, páginas de la libreta */
+  --color-papel-calido:      #EDE4CF;   /* Variante ligeramente más oscura del papel */
+  --color-lino-linea:        #C8B89A;   /* Líneas divisoras, bordes de foto */
+  --color-tracing:           #D4C9B0;   /* Papel de calco del mapa */
+
+  /* Tintas y texto */
+  --color-sepia-tinta:       #7A5C3A;   /* Texto de la narrativa principal */
+  --color-tinta-oscura:      #4A3728;   /* Texto denso, pies de foto, citas */
+  --color-tinta-faint:       #9A8070;   /* Texto secundario, notas al margen */
+
+  /* Acentos activos */
+  --color-ocre-evidencia:    #B07D3A;   /* Elementos activos, clues, combinación */
+  --color-ocre-hover:        #C99040;   /* Hover de acentos */
+  --color-ocre-sutil:        #5C3E18;   /* Fondos con acento, muy oscuro */
+
+  /* Navegación */
+  --color-azul-petroleo:     #1E4D5C;   /* Links, indicadores de progreso — SOLO sobre papel claro (mapa) */
+  --color-azul-claro:        #3587A2;   /* Fase 6: variante clara para uso sobre fondo oscuro. El original
+                                            --color-azul-petroleo cae a 2.1:1 sobre negro-revelador (falla WCAG AA);
+                                            este tono conserva el mismo matiz a 4.78:1, y se usa exclusivamente
+                                            en el indicador lateral (puntos y ticks de rama completada). */
+  --color-azul-activo:       #3A90A6;   /* Fase 6: aclarado de #2A6878 (2.86:1, fallaba AA) a 4.88:1 sobre carbon.
+                                            Hover de azul / etiquetas de Instagram. */
+  --color-azul-sutil:        #0F2830;   /* Fondos azulados */
+
+  /* Urgencia — SOLO en el mapa, zona demolición */
+  --color-carmin-demolicion: #7A2020;
+  --color-carmin-overlay:    rgba(122, 32, 32, 0.15);
+
+  /* Opacidades funcionales del papel */
+  --color-papel-overlay-10:  rgba(242, 235, 217, 0.10);
+  --color-papel-overlay-05:  rgba(242, 235, 217, 0.05);
+
+
+  /* ─────────────────────────────────────────────────────
+     TIPOGRAFÍA
+     Sistema de cuatro familias con roles estrictamente definidos.
+     Cada familia es autohospedada (declarada en @font-face en base.css).
+  ───────────────────────────────────────────────────── */
+
+  /* Familias */
+  --font-serif:        'Lora', 'Georgia', 'Times New Roman', serif;
+  --font-sans:         'Inter', 'Helvetica Neue', 'Arial', sans-serif;
+  --font-mono:         'Space Mono', 'Courier New', monospace;
+  --font-handwriting:  'Caveat', 'Segoe Script', cursive;
+
+  /* Escala tipográfica — racionalmente espaciada (ratio 1.333) */
+  --text-3xs: 0.563rem;   /*  9px — metadatos microscópicos */
+  --text-2xs: 0.694rem;   /* 11px — sprocket numbers, archive codes */
+  --text-xs:  0.750rem;   /* 12px — labels de interfaz mínimos */
+  --text-sm:  0.875rem;   /* 14px — archive-label estándar */
+  --text-md:  1.000rem;   /* 16px — base de composición */
+  --text-lg:  1.125rem;   /* 18px — texto de prose estándar */
+  --text-xl:  1.333rem;   /* ~21px */
+  --text-2xl: 1.500rem;   /* 24px */
+  --text-3xl: 2.000rem;   /* 32px */
+  --text-4xl: 2.667rem;   /* ~43px */
+  --text-5xl: 3.556rem;   /* ~57px */
+  --text-6xl: 5.000rem;   /* 80px — hero title únicamente */
+
+  /* Pesos tipográficos */
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-bold:    700;
+
+  /* Interlineados */
+  --leading-tight:   1.15;
+  --leading-snug:    1.35;
+  --leading-normal:  1.55;
+  --leading-relaxed: 1.75;
+  --leading-loose:   2.00;
+
+  /* Tracking (letter-spacing) */
+  --tracking-tight:  -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.06em;
+  --tracking-wider:   0.12em;
+  --tracking-widest:  0.18em;
+
+
+  /* ─────────────────────────────────────────────────────
+     ESPACIADO
+     Escala uniforme en rem. Permite densidades editoriales
+     sin ad-hoc magic numbers.
+  ───────────────────────────────────────────────────── */
+
+  --space-1:   0.25rem;   /*  4px */
+  --space-2:   0.5rem;    /*  8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
+  --space-32:  8rem;      /* 128px */
+  --space-40: 10rem;      /* 160px */
+  --space-48: 12rem;      /* 192px */
+  --space-64: 16rem;      /* 256px */
+
+  /* Separadores narrativos: el espacio vacío que "narra" */
+  --beat-gap:     clamp(var(--space-32), 15vh, var(--space-64));  /* Entre beats del eje */
+  --branch-gap:   var(--space-16);   /* Padding interno de los paneles de rama */
+  --section-pad:  clamp(var(--space-16), 10vw, var(--space-40)); /* Padding lateral del eje */
+
+
+  /* ─────────────────────────────────────────────────────
+     LAYOUT
+     Anchos máximos para distintos tipos de contenido.
+     Desktop-first: el eje es una columna centrada y estrecha,
+     las ramas se despliegan a lo ancho.
+  ───────────────────────────────────────────────────── */
+
+  --prose-width:        640px;   /* Ancho de lectura del texto narrativo */
+  --content-width:      860px;   /* Ancho general de contenido del eje */
+  --branch-width:      1200px;   /* Ancho máximo de los paneles de rama */
+  --contact-sheet-width: 100%;   /* El contact sheet usa el ancho completo disponible */
+
+  /* Medidas del spine-indicator (barra lateral) */
+  --indicator-width:     56px;
+  --indicator-offset:    var(--space-8);
+
+
+  /* ─────────────────────────────────────────────────────
+     DURACIONES Y CURVAS DE ANIMACIÓN
+     Inspiradas en el proceso fotográfico: lentas, orgánicas,
+     sin elasticidad. No hay "bounces" en un cuarto oscuro.
+  ───────────────────────────────────────────────────── */
+
+  /* Duraciones base */
+  --dur-instant:  80ms;
+  --dur-fast:    200ms;
+  --dur-normal:  400ms;
+  --dur-slow:    600ms;
+  --dur-reveal:  900ms;    /* El efecto de revelado fotográfico */
+  --dur-branch:  700ms;    /* Expansión/colapso de paneles de rama */
+  --dur-page:    500ms;    /* Paso de página en la libreta */
+  --dur-climax: 1400ms;    /* La foto de la niña: más lenta que todo lo demás */
+
+  /* Curvas de easing */
+  --ease-out-soft:    cubic-bezier(0.16, 1, 0.3, 1);    /* Para entradas suaves */
+  --ease-in-out-edit: cubic-bezier(0.76, 0, 0.24, 1);   /* Expansiones de panel */
+  --ease-develop:     cubic-bezier(0.22, 0.58, 0.36, 1); /* El revelado fotográfico */
+  --ease-click:       cubic-bezier(0.34, 1.26, 0.64, 1); /* Micro: el clic de un dial */
+
+
+  /* ─────────────────────────────────────────────────────
+     BORDES Y RADIOS
+  ───────────────────────────────────────────────────── */
+
+  --radius-sm:   2px;   /* Casi imperceptible: evidencias, labels */
+  --radius-md:   4px;   /* Tarjetas de evidencia, bordes de foto */
+  --radius-lg:   8px;   /* Paneles de rama */
+  --radius-pill: 100px; /* El scrubber del podcast */
+
+  --border-hair:   0.5px solid var(--color-gris-medio);
+  --border-thin:   1px   solid var(--color-gris-medio);
+  --border-paper:  1px   solid var(--color-lino-linea);
+  --border-ocre:   1px   solid var(--color-ocre-evidencia);
+
+
+  /* ─────────────────────────────────────────────────────
+     SOMBRAS
+     Evocadoras de la profundidad del papel fotográfico,
+     nunca del "card shadow" del diseño de interfaz corporativo.
+  ───────────────────────────────────────────────────── */
+
+  --shadow-photo:
+    0 4px 16px rgba(0, 0, 0, 0.6),
+    0 1px  4px rgba(0, 0, 0, 0.4);
+
+  --shadow-paper:
+    0 2px  8px rgba(0, 0, 0, 0.4),
+    0 1px  3px rgba(0, 0, 0, 0.3);
+
+  --shadow-branch:
+    0 8px 40px rgba(0, 0, 0, 0.7),
+    0 2px  8px rgba(0, 0, 0, 0.5);
+
+  --shadow-evidence:
+    2px 3px 12px rgba(0, 0, 0, 0.5),
+    1px 1px  4px rgba(0, 0, 0, 0.3);
+
+  --shadow-inset-dark:
+    inset 0 2px 8px rgba(0, 0, 0, 0.6);
+
+
+  /* ─────────────────────────────────────────────────────
+     Z-INDEX — capas semánticas
+  ───────────────────────────────────────────────────── */
+
+  --z-grain:      1;     /* El overlay de grano de film sobre el body */
+  --z-content:    10;    /* Contenido del eje */
+  --z-branch:     20;    /* Los paneles de rama expandidos */
+  --z-indicator:  30;    /* El spine indicator lateral */
+  --z-skip:       100;   /* El skip link de accesibilidad */
+
+
+  /* ─────────────────────────────────────────────────────
+     ESTADOS DE COLOR para aria-* y data-*
+     Referenciados por JavaScript para no hardcodear en JS.
+  ───────────────────────────────────────────────────── */
+
+  --color-state-locked:    var(--color-gris-sutil);
+  --color-state-active:    var(--color-ocre-evidencia);
+  --color-state-complete:  var(--color-azul-petroleo);
+  --color-state-danger:    var(--color-carmin-demolicion);
+}
