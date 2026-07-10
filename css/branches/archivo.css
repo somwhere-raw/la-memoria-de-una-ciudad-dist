@@ -1,0 +1,627 @@
+/*
+ * BRANCHES/ARCHIVO.CSS
+ * La Memoria de una Ciudad — El compartimento
+ *
+ * Identidad UI: la recompensa. La cerradura que toda la experiencia espera.
+ * Dos fases:
+ *   Fase 1 · Los seis diales de la cámara — se giran hasta 196247
+ *   Fase 2 · El compartimento se abre — el rollo y el sobre sellado emergen
+ *
+ * El ritmo de este panel es el más lento de toda la experiencia.
+ * Cada evento tiene peso. Nada elástico, nada rápido.
+ */
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SECUENCIA DEL ARCHIVO
+═══════════════════════════════════════════════════════════════ */
+
+.archivo-sequence {
+  display:        flex;
+  flex-direction: column;
+  gap:            clamp(3rem, 7vw, 6rem);
+  align-items:    stretch;
+}
+
+/* Cada fase es un panel independiente */
+.archivo-phase {
+  width:     100%;
+  display:   flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:       var(--space-8);
+}
+
+.archivo-phase[hidden] {
+  display: none;
+}
+
+.archivo-intro {
+  width:      min(100%, 760px);
+  padding-left: clamp(1rem, 2vw, 1.75rem);
+  border-left: 1px solid var(--color-ocre-evidencia);
+}
+
+.archivo-intro h3 {
+  max-width:      15ch;
+  margin:         var(--space-3) 0 var(--space-5);
+  font-family:    var(--font-display);
+  font-size:      clamp(2.2rem, 5vw, 4.5rem);
+  font-weight:    var(--weight-regular);
+  line-height:    0.98;
+  letter-spacing: var(--tracking-tight);
+  color:          var(--color-papel-envejecido);
+}
+
+.archivo-intro > p:last-child {
+  max-width:   62ch;
+  margin:      0;
+  line-height: var(--leading-relaxed);
+  color:       #ded6c8;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   FASE 1 — EL MECANISMO DE DIALES
+   La parte inferior de la cámara con seis diales giratorios.
+   La interacción es táctil: arrastre vertical o clic arriba/abajo.
+═══════════════════════════════════════════════════════════════ */
+
+.dial-mechanism {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            var(--space-8);
+  width:          min(100%, 760px);
+}
+
+/* El cuerpo de la cámara */
+.camera-mechanism {
+  display: block;
+  max-width: 100%;
+}
+
+.camera-mechanism__body {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  gap:             var(--space-4);
+  background:      var(--color-gris-carbon);
+  padding:         clamp(1.25rem, 4vw, 3rem);
+  border:          1px solid var(--color-gris-medio);
+  border-radius:   var(--radius-md);
+  box-shadow:
+    var(--shadow-photo),
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 -2px 6px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+/* La textura metálica de la cámara */
+.camera-mechanism__body::before {
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  border-radius: var(--radius-md);
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 1px,
+    rgba(255,255,255,0.015) 1px,
+    rgba(255,255,255,0.015) 2px
+  );
+  pointer-events: none;
+}
+
+/* La franja de diales */
+.camera-mechanism__dials {
+  display:         flex;
+  gap:             var(--space-3);
+  align-items:     center;
+  justify-content: center;
+  position:        relative;
+  z-index:         1;
+}
+
+.camera-dial-group {
+  display:     flex;
+  gap:         var(--space-2);
+  align-items: center;
+}
+
+.camera-dial-separator {
+  font-family: var(--font-mono);
+  font-size:   var(--text-xl);
+  color:       var(--color-gris-sutil);
+}
+
+
+/* ─────────────────────────────────────────────────────
+   DIAL INDIVIDUAL
+   Cada uno es un spinbutton accesible.
+   La interacción (arrastre / rueda / teclado) la gestiona archivo.js.
+───────────────────────────────────────────────────── */
+
+.camera-dial {
+  width:           44px;
+  height:          64px;
+  background:      var(--color-negro-revelador);
+  border:          1px solid var(--color-gris-medio);
+  border-radius:   var(--radius-sm);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-family:     var(--font-mono);
+  font-size:       var(--text-2xl);
+  font-weight:     var(--weight-bold);
+  color:           var(--color-gris-sutil);
+  cursor:          ns-resize;
+  /* Fase 6: sin esto, arrastrar un dial en pantalla táctil también
+     dispara el scroll nativo de la página verticalmente, compitiendo
+     con archivo.js (que escucha pointermove para el mismo gesto). */
+  touch-action:    none;
+  position:        relative;
+  overflow:        hidden;
+  user-select:     none;
+  /* El efecto de grabado del dial */
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.6),
+    inset 0 -1px 0 rgba(255,255,255,0.06),
+    0 1px 0 rgba(255,255,255,0.04);
+  transition:
+    color        var(--dur-normal) var(--ease-out-soft),
+    border-color var(--dur-normal) var(--ease-out-soft),
+    box-shadow   var(--dur-normal) var(--ease-out-soft);
+}
+
+/* Las estrías verticales del dial */
+.camera-dial::before {
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  background: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent 4px,
+    rgba(255,255,255,0.025) 4px,
+    rgba(255,255,255,0.025) 5px
+  );
+  pointer-events: none;
+}
+
+/* La ranura central del dial */
+.camera-dial::after {
+  content:    '';
+  position:   absolute;
+  left:       0;
+  right:      0;
+  top:        50%;
+  height:     1px;
+  background: var(--color-gris-medio);
+  transform:  translateY(-50%);
+  opacity:    0.5;
+}
+
+/* Hover: el dial se ilumina ligeramente */
+.camera-dial:hover {
+  border-color: var(--color-gris-sutil);
+  color:        var(--color-lino-linea);
+}
+
+/* Focus de teclado */
+.camera-dial:focus-visible {
+  outline:      2px solid var(--color-ocre-evidencia);
+  outline-offset: 2px;
+  border-color: var(--color-ocre-evidencia);
+}
+
+/* Estado activo: el dígito correcto está en su posición */
+.camera-dial.is-correct {
+  color:        var(--color-ocre-evidencia);
+  border-color: var(--color-ocre-evidencia);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.6),
+    0 0 8px rgba(176, 125, 58, 0.3),
+    0 0 2px rgba(176, 125, 58, 0.5);
+}
+
+/* Animación de giro del dial (GSAP la gestiona, esto es el estado visual) */
+.camera-dial.is-spinning {
+  color:   var(--color-lino-linea);
+  opacity: 0.8;
+}
+
+/* La trampilla inferior de la cámara */
+.camera-mechanism__hatch {
+  width:           100%;
+  height:          8px;
+  background:      linear-gradient(to bottom, #1A1714, #0D0C0A);
+  border-radius:   0 0 var(--radius-sm) var(--radius-sm);
+  position:        relative;
+  overflow:        hidden;
+  transition:      height var(--dur-slow) var(--ease-in-out-edit);
+}
+
+.camera-mechanism__hatch::after {
+  content:   '';
+  position:  absolute;
+  left:      45%;
+  top:       0;
+  bottom:    0;
+  width:     10%;
+  background: linear-gradient(to right,
+    transparent,
+    rgba(255,255,255,0.04) 40%,
+    rgba(255,255,255,0.04) 60%,
+    transparent
+  );
+}
+
+/* Estado abierto: la trampilla baja */
+.camera-mechanism__hatch[data-state="open"] {
+  height:     48px;
+  background: linear-gradient(to bottom, #1A1714, #080706);
+  box-shadow: var(--shadow-inset-dark);
+}
+
+/* El indicador de estado del mecanismo */
+#dial-status {
+  font-size:      var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  color:          var(--color-tinta-faint);
+  text-align:     center;
+  transition:     color var(--dur-normal) var(--ease-out-soft);
+}
+
+/* Estado: combinación correcta */
+#dial-status.is-correct {
+  color: var(--color-ocre-evidencia);
+}
+
+.archivo-instructions {
+  max-width:   52ch;
+  margin:      0;
+  font-size:   var(--text-sm);
+  line-height: var(--leading-relaxed);
+  text-align:  center;
+  color:       var(--color-tinta-faint);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FASE 2 — EL COMPARTIMENTO SE ABRE
+   Después del clic correcto: el contenido del compartimento emerge.
+═══════════════════════════════════════════════════════════════ */
+
+.compartimento-open {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            var(--space-8);
+  width:          100%;
+  max-width:      760px;
+  padding:        clamp(1.5rem, 5vw, 3.5rem);
+  background:     var(--color-carbon);
+  border:         var(--border-hair);
+  border-radius:  var(--radius-md);
+  /* Emergencia desde el negro */
+  opacity:        0;
+  transform:      translateY(16px);
+  transition:
+    opacity   var(--dur-reveal) var(--ease-develop),
+    transform var(--dur-reveal) var(--ease-develop);
+}
+
+.compartimento-open.is-revealed {
+  opacity:   1;
+  transform: translateY(0);
+}
+
+.compartimento-open p.prose {
+  text-align:  center;
+  font-style:  italic;
+  color:       var(--color-tinta-faint);
+  font-size:   var(--text-lg);
+  max-width:   none;
+}
+
+.compartimento-open__header {
+  width:      100%;
+  text-align: center;
+}
+
+.compartimento-open__header h3 {
+  margin:      var(--space-3) 0 0;
+  font-family: var(--font-display);
+  font-size:   clamp(2rem, 5vw, 3.75rem);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color:       var(--color-papel-envejecido);
+}
+
+.compartimento-objects {
+  display:         flex;
+  align-items:     end;
+  justify-content: center;
+  gap:             clamp(3rem, 9vw, 7rem);
+  width:           100%;
+}
+
+.compartimento-objects figure {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            var(--space-4);
+  margin:         0;
+}
+
+
+/* ─────────────────────────────────────────────────────
+   EL ROLLO FOTOGRÁFICO DE 35mm
+   Un cilindro metálico oscuro con su etiqueta de archivo.
+───────────────────────────────────────────────────── */
+
+.film-canister {
+  display:  block;
+}
+
+.film-canister__body {
+  width:           80px;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     stretch;
+  box-shadow:      var(--shadow-evidence);
+  position:        relative;
+}
+
+/* La tapa superior del cartucho */
+.film-canister__cap {
+  height:   10px;
+  background: linear-gradient(to bottom,
+    #4A4846,
+    #2C2A27
+  );
+  position: relative;
+}
+
+.film-canister__cap--top {
+  border-radius: 4px 4px 0 0;
+}
+
+.film-canister__cap--bottom {
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(to top, #4A4846, #2C2A27);
+}
+
+/* El cuerpo del cartucho */
+.film-canister__label {
+  background:      var(--color-negro-revelador);
+  border:          1px solid var(--color-gris-carbon);
+  border-top:      none;
+  border-bottom:   none;
+  padding:         var(--space-4) var(--space-3);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  position:        relative;
+  overflow:        hidden;
+  /* Ranura de extracción de la película */
+}
+
+/* La ranura del film que sale del cartucho */
+.film-canister__label::before {
+  content:    '';
+  position:   absolute;
+  right:      -2px;
+  top:        50%;
+  transform:  translateY(-50%);
+  width:      6px;
+  height:     24px;
+  background: var(--color-gris-sutil);
+  border-radius: 2px;
+}
+
+.film-canister__label .archive-label {
+  font-size:      var(--text-2xs);
+  letter-spacing: var(--tracking-wider);
+  color:          var(--color-gris-sutil);
+  line-height:    var(--leading-snug);
+  text-align:     center;
+}
+
+
+/* ─────────────────────────────────────────────────────
+   EL SOBRE SELLADO
+   El mensaje de Gabriel encontrado pegado al interior.
+   Se abrirá en el Beat 13 (La Nota), no aquí.
+───────────────────────────────────────────────────── */
+
+.sobre-sellado {
+  display: block;
+}
+
+.sobre-sellado__envelope {
+  width:           160px;
+  background:      var(--color-papel-calido);
+  padding:         var(--space-6) var(--space-5);
+  position:        relative;
+  box-shadow:      var(--shadow-evidence);
+  border-radius:   1px;
+}
+
+/* La solapa superior del sobre */
+.sobre-sellado__flap {
+  position:    absolute;
+  top:         0;
+  left:        0;
+  right:       0;
+  height:      40%;
+  clip-path:   polygon(0 0, 100% 0, 50% 100%);
+  background:  var(--color-papel-envejecido);
+}
+
+/* El borde del sobre */
+.sobre-sellado__envelope::before {
+  content:       '';
+  position:      absolute;
+  inset:         0;
+  border:        1px solid var(--color-lino-linea);
+  pointer-events: none;
+}
+
+/* Las líneas diagonales del sobre (las esquinas que se doblan) */
+.sobre-sellado__envelope::after {
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  background:
+    linear-gradient(135deg, transparent 45%, var(--color-lino-linea) 45%, var(--color-lino-linea) 46%, transparent 46%),
+    linear-gradient(225deg, transparent 45%, var(--color-lino-linea) 45%, var(--color-lino-linea) 46%, transparent 46%);
+  opacity:    0.3;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EL SOBRE ABRIÉNDOSE — BEAT 13 (beat-nota)
+   Esta es la animación de apertura en el eje principal,
+   no dentro de la rama. El sobre era la misma figura
+   del compartimento ahora en el eje.
+═══════════════════════════════════════════════════════════════ */
+
+.sobre-open {
+  display:         flex;
+  justify-content: center;
+  margin-bottom:   var(--space-8);
+}
+
+.sobre-open__envelope {
+  width:           140px;
+  height:          90px;
+  background:      var(--color-papel-calido);
+  position:        relative;
+  box-shadow:      var(--shadow-paper);
+  border:          1px solid var(--color-lino-linea);
+}
+
+/* La solapa que se abre */
+.sobre-open__flap {
+  position:         absolute;
+  top:              0;
+  left:             0;
+  right:            0;
+  height:           50%;
+  clip-path:        polygon(0 0, 100% 0, 50% 100%);
+  background:       var(--color-papel-envejecido);
+  transform-origin: top center;
+  /* spine.js / sobre-open.js anima esto: rotateX(0) → rotateX(180deg) */
+  transition:
+    transform var(--dur-slow) var(--ease-in-out-edit),
+    clip-path var(--dur-slow) var(--ease-in-out-edit);
+}
+
+/* Estado abierto: la solapa baja hacia atrás */
+.sobre-open.is-opening .sobre-open__flap {
+  transform: rotateX(180deg);
+  clip-path:  polygon(0 100%, 100% 100%, 50% 0);
+}
+
+/* Las líneas diagonales del sobre base */
+.sobre-open__envelope::after {
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  background:
+    linear-gradient(135deg, transparent 45%, var(--color-lino-linea) 45%, var(--color-lino-linea) 46%, transparent 46%),
+    linear-gradient(225deg, transparent 45%, var(--color-lino-linea) 45%, var(--color-lino-linea) 46%, transparent 46%);
+  opacity:    0.3;
+  pointer-events: none;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ESTADO DE LA RAMA DURANTE LA SECUENCIA
+   Transiciones entre Fase 1 y Fase 2.
+   archivo.js añade/retira .is-active en cada .archivo-phase.
+═══════════════════════════════════════════════════════════════ */
+
+.archivo-phase {
+  opacity:    1;
+  transition:
+    opacity   var(--dur-slow) var(--ease-out-soft),
+    transform var(--dur-slow) var(--ease-out-soft);
+}
+
+.archivo-phase.is-exiting {
+  opacity:   0;
+  transform: scale(0.97);
+}
+
+.archivo-phase.is-entering {
+  opacity:   0;
+  transform: scale(0.97);
+}
+
+.archivo-phase.is-entered {
+  opacity:   1;
+  transform: scale(1);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   EL CLIC SUAVE — el sonido visual del compartimento
+   Un micro-flash de luz que sale del contorno de la trampilla
+   en el momento exacto del clic correcto.
+   GSAP gestiona la animación real; esto define el elemento.
+═══════════════════════════════════════════════════════════════ */
+
+.camera-mechanism__body.has-clicked::before {
+  content:    '';
+  position:   absolute;
+  inset:      -2px;
+  border-radius: calc(var(--radius-md) + 2px);
+  border:     2px solid var(--color-ocre-evidencia);
+  opacity:    var(--flash-opacity, 0);
+  pointer-events: none;
+}
+
+@media (max-width: 620px) {
+  .archivo-intro {
+    padding-left: var(--space-4);
+  }
+
+  .archivo-intro h3 {
+    font-size: clamp(2.1rem, 12vw, 3.2rem);
+  }
+
+  .camera-mechanism__dials {
+    flex-direction: column;
+  }
+
+  .camera-dial-separator {
+    line-height: 0.6;
+  }
+
+  .compartimento-objects {
+    align-items: center;
+    gap:         clamp(2rem, 12vw, 4rem);
+  }
+}
+
+@media (max-width: 420px) {
+  .camera-mechanism__body {
+    width:   100%;
+    padding: var(--space-5);
+  }
+
+  .compartimento-objects {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .camera-dial,
+  .camera-mechanism__hatch,
+  .compartimento-open,
+  .archivo-phase {
+    transition-duration: 0.01ms;
+  }
+}

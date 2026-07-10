@@ -1,0 +1,498 @@
+/*
+ * BRANCHES/MAPA.CSS
+ * La Memoria de una Ciudad — Rama 02: Mapa vivo
+ *
+ * Identidad UI: cartografía sobre papel de calco.
+ * No es Google Maps. Plano dibujado a mano con puntos ×,
+ * trama azul petróleo en zonas amenazadas,
+ * panel lateral de detalle por punto.
+ */
+
+
+/* ═══════════════════════════════════════════════════════════════
+   EXPLORADOR DEL MAPA
+═══════════════════════════════════════════════════════════════ */
+
+.mapa-explorer {
+  display:        grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-areas:
+    "intro intro"
+    "map detail"
+    "evidence evidence";
+  gap:            var(--space-8);
+  align-items:    start;
+  min-height:     500px;
+}
+
+.mapa-intro {
+  grid-area:    intro;
+  display:      grid;
+  gap:          var(--space-4);
+  max-width:    72ch;
+  padding-left: clamp(1rem, 3vw, 2rem);
+  border-left:  1px solid var(--p4-petrol);
+}
+
+.mapa-intro h3 {
+  max-width:   18ch;
+  margin:      0;
+  color:       var(--p4-ink);
+  font-family: var(--font-serif);
+  font-size:   clamp(2.1rem, 5vw, 4.2rem);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.mapa-intro > p:not(.archive-label) {
+  max-width:   62ch;
+  margin:      0;
+  color:       var(--p4-ink);
+  font-family: var(--font-serif);
+  font-size:   var(--text-md);
+  line-height: var(--leading-relaxed);
+}
+
+.mapa-key {
+  display:     flex;
+  flex-wrap:   wrap;
+  gap:         var(--space-4) var(--space-8);
+  padding-top: var(--space-3);
+  color:       var(--p4-ink);
+  font-family: var(--font-sans);
+  font-size:   var(--text-xs);
+}
+
+.mapa-key span {
+  display:     inline-flex;
+  align-items: center;
+  gap:         var(--space-2);
+}
+
+.mapa-key b {
+  color:       var(--p4-petrol);
+  font-family: var(--font-mono);
+  font-size:   var(--text-lg);
+}
+
+.mapa-key i {
+  width:  1.5rem;
+  height: 0.8rem;
+  border: 1px solid var(--p4-petrol);
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--p4-petrol) 22%, transparent) 0 2px,
+    transparent 2px 5px
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   EL CANVAS DEL MAPA
+   La superficie de papel de calco sobre la que se dibuja Lima.
+═══════════════════════════════════════════════════════════════ */
+
+.mapa-canvas {
+  grid-area: map;
+  position: relative;
+  flex:     1;
+}
+
+.mapa-canvas__surface {
+  position:      relative;
+  width:         100%;
+  padding-top:   68.9%; /* Ratio del SVG base 900×620 */
+  background:    var(--color-tracing);
+  border:        var(--border-paper);
+  border-radius: var(--radius-sm);
+  overflow:      hidden;
+  box-shadow:
+    var(--shadow-paper),
+    inset 0 0 60px rgba(176, 125, 58, 0.06);
+}
+
+/* La textura del papel de calco */
+.mapa-canvas__surface::before {
+  content:        '';
+  position:       absolute;
+  inset:          0;
+  background:
+    repeating-linear-gradient(0deg, rgba(91,73,48,0.035) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 7px),
+    radial-gradient(circle at 24% 20%, rgba(255,255,255,0.24), transparent 42%);
+  opacity:        0.4;
+  pointer-events: none;
+  z-index:        1;
+}
+
+/* El SVG base del mapa: posicionado absolutamente */
+.mapa-canvas__base {
+  position:    absolute;
+  inset:       0;
+  width:       100%;
+  height:      100%;
+  object-fit:  cover;
+  /* El SVG está dibujado con trazo sepia sobre fondo transparente */
+  opacity:     0.85;
+  mix-blend-mode: multiply;
+}
+
+/*
+  TRAMA — ZONAS AMENAZADAS
+  No es decoración: diferencia áreas afectadas sin usar el rojo
+  reservado al laboratorio y sin comunicar la información solo por color.
+*/
+.mapa-overlay--threatened {
+  position:        absolute;
+  inset:           0;
+  pointer-events:  none;
+  z-index:         2;
+  background:
+    repeating-linear-gradient(
+      128deg,
+      transparent 0 18px,
+      color-mix(in srgb, var(--p4-petrol) 16%, transparent) 18px 21px,
+      transparent 21px 38px
+    ),
+    radial-gradient(
+      ellipse 55% 38% at 50% 38%,
+      color-mix(in srgb, var(--p4-petrol) 12%, transparent) 0%,
+      transparent 72%
+    );
+  opacity:         0;
+  transition:      opacity var(--dur-reveal) var(--ease-out-soft);
+}
+
+/* La trama se activa cuando el mapa está listo */
+.mapa-canvas__surface.is-loaded .mapa-overlay--threatened {
+  opacity: 1;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PUNTOS DEL MAPA
+   Los × de Gabriel Medina. Botones, no elementos decorativos.
+═══════════════════════════════════════════════════════════════ */
+
+.mapa-points {
+  position: absolute;
+  inset:    0;
+  z-index:  3;
+}
+
+/* Cada punto interactivo */
+.mapa-point {
+  position:       absolute;
+  transform:      translate(-50%, -50%);
+  width:          44px;
+  height:         44px;
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  /* Oculto por defecto: mapa.js los revela en secuencia */
+  opacity:        0;
+  border-radius:  50%;
+  transition:     opacity var(--dur-slow) var(--ease-out-soft);
+}
+
+.mapa-point.is-visible {
+  opacity: 1;
+}
+
+/* El × de Gabriel */
+.mapa-point__cross {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xl);
+  font-weight:    var(--weight-bold);
+  color:          var(--p4-petrol);
+  line-height:    1;
+  letter-spacing: -0.05em;
+  position:       relative;
+  z-index:        1;
+  transition:
+    color     var(--dur-fast) var(--ease-out-soft),
+    transform var(--dur-fast) var(--ease-out-soft);
+}
+
+/* El punto final sin nombre: ◯ en vez de × */
+.mapa-point__cross--empty {
+  color:     var(--color-gris-sutil);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+}
+
+/* Hover del punto */
+.mapa-point:hover .mapa-point__cross {
+  color:     var(--p4-ink);
+  transform: scale(1.3);
+}
+
+/* Punto activo (seleccionado) */
+.mapa-point.is-active .mapa-point__cross {
+  color:     var(--p4-petrol);
+  transform: scale(1.4);
+}
+
+.mapa-point:focus-visible {
+  outline:        3px solid var(--p4-petrol);
+  outline-offset: 3px;
+}
+
+/* El pulso: el efecto de latido detrás del × */
+.mapa-point__pulse {
+  position:      absolute;
+  inset:         -4px;
+  border-radius: 50%;
+  border:        1px solid var(--p4-petrol);
+  opacity:       0;
+}
+
+.mapa-point:hover .mapa-point__pulse,
+.mapa-point:focus-visible .mapa-point__pulse,
+.mapa-point.is-active .mapa-point__pulse {
+  opacity: 1;
+  animation: point-pulse 0.7s ease-out 1;
+}
+
+@keyframes point-pulse {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  70%  { transform: scale(2.5); opacity: 0;   }
+  100% { transform: scale(2.5); opacity: 0;   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PANEL DE DETALLE DEL PUNTO
+   Se muestra lateralmente al seleccionar un punto.
+═══════════════════════════════════════════════════════════════ */
+
+.mapa-detail {
+  grid-area:       detail;
+  position:        sticky;
+  top:             var(--space-8);
+  background:      var(--p4-paper-clear);
+  border:          1px solid color-mix(in srgb, var(--p4-ink) 18%, transparent);
+  border-radius:   var(--radius-md);
+  overflow:        hidden;
+  /* Estado inicial oculto */
+  opacity:         0;
+  transform:       translateX(12px);
+  pointer-events:  none;
+  transition:
+    opacity   var(--dur-normal) var(--ease-out-soft),
+    transform var(--dur-normal) var(--ease-out-soft);
+}
+
+.mapa-detail.is-active {
+  opacity:         1;
+  transform:       translateX(0);
+  pointer-events:  auto;
+}
+
+.mapa-detail__close {
+  position:    absolute;
+  z-index:     2;
+  top:         var(--space-3);
+  right:       var(--space-3);
+  width:       40px;
+  height:      40px;
+  display:     flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size:   var(--text-md);
+  color:       var(--p4-ink);
+  border-radius: 50%;
+  transition:
+    color      var(--dur-fast) var(--ease-out-soft),
+    background var(--dur-fast) var(--ease-out-soft);
+}
+
+.mapa-detail__close:hover {
+  color:      var(--p4-paper-clear);
+  background: var(--p4-petrol);
+}
+
+.mapa-detail__close:focus-visible {
+  outline:        3px solid var(--p4-petrol);
+  outline-offset: 2px;
+}
+
+.mapa-detail__photo-wrap {
+  width:      100%;
+  aspect-ratio: 4/5;
+  overflow:   hidden;
+  background: var(--color-gris-carbon);
+}
+
+.mapa-detail__photo {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  transition: opacity var(--dur-slow) var(--ease-out-soft);
+}
+
+.mapa-detail__photo-status {
+  display:       grid;
+  place-items:   center;
+  min-height:    100%;
+  margin:        0;
+  padding:       var(--space-5);
+  color:         var(--p4-paper-clear);
+  font-family:   var(--font-sans);
+  font-size:     var(--text-sm);
+  line-height:   var(--leading-normal);
+  text-align:    center;
+}
+
+.mapa-detail__photo-status[hidden] {
+  display: none;
+}
+
+.mapa-detail__info {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap:     var(--space-2);
+}
+
+.mapa-detail__person {
+  font-family:    var(--font-serif);
+  font-size:      var(--text-lg);
+  font-weight:    var(--weight-bold);
+  color:          var(--p4-ink);
+  line-height:    var(--leading-snug);
+  font-style:     normal;
+}
+
+.mapa-detail__occupation {
+  font-size:      var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  color:          var(--p4-petrol);
+}
+
+.mapa-detail__address {
+  font-size:      var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color:          var(--color-tinta-oscura);
+  margin-top:     var(--space-1);
+}
+
+.mapa-detail__caption {
+  font-family:    var(--font-serif);
+  font-size:      var(--text-md);
+  font-style:     italic;
+  line-height:    var(--leading-relaxed);
+  color:          var(--p4-ink);
+  margin-top:     var(--space-2);
+  border-top:     var(--border-hair);
+  padding-top:    var(--space-3);
+}
+
+/* Estado especial del punto sin nombre en el panel */
+.mapa-detail.is-unnamed .mapa-detail__person {
+  color:      var(--color-gris-sutil);
+  font-style: italic;
+}
+
+.mapa-evidence {
+  grid-area: evidence;
+}
+
+.mapa-detail.is-unnamed .mapa-detail__caption::before {
+  content:        '';
+  display:        block;
+  width:          24px;
+  height:         1px;
+  background:     var(--color-gris-sutil);
+  margin-bottom:  var(--space-3);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   LEYENDA DEL MAPA
+═══════════════════════════════════════════════════════════════ */
+
+.mapa-legend {
+  display:     flex;
+  gap:         var(--space-6);
+  align-items: center;
+  padding-top: var(--space-4);
+  border-top:  var(--border-hair);
+  margin-top:  var(--space-4);
+}
+
+.mapa-legend__item {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-2);
+}
+
+.mapa-legend__mark {
+  font-family: var(--font-mono);
+  font-size:   var(--text-sm);
+  color:       var(--p4-petrol);
+  font-weight: var(--weight-bold);
+}
+
+.mapa-legend__mark--empty {
+  color: var(--color-gris-sutil);
+}
+
+.mapa-legend__dot {
+  width:       10px;
+  height:      10px;
+  border-radius: 1px;
+  background:  color-mix(in srgb, var(--p4-petrol) 18%, transparent);
+  border:      1px solid var(--p4-petrol);
+}
+
+.mapa-legend__label {
+  font-size:      var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color:          var(--color-tinta-faint);
+}
+
+@media (max-width: 959px) {
+  .mapa-explorer {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "intro"
+      "map"
+      "detail"
+      "evidence";
+  }
+
+  .mapa-detail {
+    position: static;
+    width:    100%;
+  }
+}
+
+@media (max-width: 599px) {
+  .mapa-intro {
+    padding-left: 1rem;
+  }
+
+  .mapa-intro h3 {
+    font-size: clamp(2.2rem, 12vw, 3.4rem);
+  }
+
+  .mapa-key {
+    display: grid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapa-overlay--threatened,
+  .mapa-point,
+  .mapa-point__cross,
+  .mapa-detail,
+  .mapa-detail__photo,
+  .podcast-evidence {
+    transition-duration: 0.01ms !important;
+  }
+
+  .mapa-point__pulse {
+    animation: none !important;
+  }
+}

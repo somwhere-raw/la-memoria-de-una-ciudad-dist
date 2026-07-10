@@ -1,0 +1,7 @@
+Aquí van 3 fotografías (formato .jpg), con estos nombres EXACTOS:
+
+  ernesto-anverso.jpg   -> hombre mayor frente a un negocio del Centro
+  lucia-anverso.jpg     -> mujer pintando un mural
+  quispe-anverso.jpg    -> familia frente a una vivienda antigua
+
+El nombre del archivo debe ser idéntico a estos (todo en minúsculas).

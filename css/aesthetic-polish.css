@@ -1,0 +1,646 @@
+/*
+ * AESTHETIC POLISH
+ * Pase final de dirección de arte para “La Memoria de una Ciudad”.
+ * Conserva la lógica narrativa y las interacciones; corrige composición,
+ * jerarquía, ritmo vertical y materialidad del archivo.
+ */
+
+:root {
+  --p4-page: min(1180px, calc(100% - 4rem));
+  --p4-obsidian: #0a0908;
+  --p4-coal: #12100e;
+  --p4-paper: #efe9dc;
+  --p4-paper-clear: #f5f1e8;
+  --p4-ink: #29251f;
+  --p4-ochre: #b57e3e;
+  --p4-petrol: #28575b;
+  --archive-rule: color-mix(in srgb, var(--p4-ink) 17%, transparent);
+}
+
+html {
+  background: var(--p4-obsidian);
+}
+
+body {
+  overflow-x: clip;
+  background: var(--p4-obsidian);
+}
+
+/* Grano muy fino y fijo: textura, no filtro protagonista. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: soft-light;
+}
+
+/* Cabecera editorial constante, más limpia que el degradado alto anterior. */
+.story-header {
+  min-height: 3.6rem;
+  padding: 0.75rem clamp(1.25rem, 4vw, 3.25rem);
+  background: rgb(10 9 8 / 72%);
+  border-bottom: 1px solid rgb(242 235 217 / 8%);
+  box-shadow: 0 8px 30px rgb(0 0 0 / 10%);
+  backdrop-filter: blur(12px) saturate(0.9);
+}
+
+body[data-current-act="instagram"] .story-header,
+body[data-current-act="ernesto"] .story-header,
+body[data-current-act="lucia"] .story-header,
+body[data-current-act="quispe"] .story-header,
+body[data-current-act="gabriel"] .story-header,
+body[data-current-act="mapa-col"] .story-header,
+body[data-current-act="brena"] .story-header,
+body[data-current-act="nota"] .story-header,
+body[data-current-act="cierre"] .story-header {
+  color: var(--p4-ink);
+  background: rgb(245 241 232 / 82%);
+  border-bottom-color: rgb(41 37 31 / 9%);
+  box-shadow: 0 8px 28px rgb(41 37 31 / 7%);
+}
+
+.story-header__title {
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+
+.story-header__act {
+  letter-spacing: 0.14em;
+}
+
+/* Papel con variación mínima, evitando superficies digitales completamente planas. */
+#beat-instagram,
+#beat-ernesto,
+#beat-lucia,
+#beat-quispe,
+#beat-gabriel,
+#beat-mapa-col,
+#beat-brena,
+#beat-nina,
+#beat-nota,
+#beat-cierre {
+  background-image:
+    radial-gradient(circle at 14% 12%, rgb(109 83 54 / 3.5%) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 79% 68%, rgb(109 83 54 / 2.8%) 0 1px, transparent 1.5px),
+    linear-gradient(92deg, rgb(255 255 255 / 13%), transparent 28%, rgb(91 69 45 / 1.8%) 72%, transparent);
+  background-size: 31px 31px, 43px 43px, 100% 100%;
+}
+
+/* Ritmo menos vacío y lectura algo más ancha. */
+.beat:not(.beat--hero) {
+  min-height: min(84svh, 860px);
+  padding-block: clamp(6.25rem, 12vh, 9.5rem);
+}
+
+.beat:not(.beat--hero) .prose {
+  max-width: 60ch;
+  font-size: clamp(1.06rem, 1.26vw, 1.22rem);
+  line-height: 1.72;
+  letter-spacing: 0;
+}
+
+.beat:not(.beat--hero) .prose p + p {
+  margin-top: clamp(1.35rem, 2.7vh, 2rem);
+}
+
+.act-marker {
+  margin-bottom: clamp(2rem, 4.5vh, 3.5rem);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+}
+
+/* Hero: mantiene el impacto, mejora balance y lectura sobre la fotografía. */
+.beat--hero .hero-image__img {
+  object-position: center 58%;
+  filter: brightness(0.49) saturate(0.72) contrast(1.05);
+  transform: scale(1.01);
+}
+
+.beat--hero .hero-vignette {
+  background:
+    linear-gradient(90deg, rgb(10 9 8 / 82%) 0%, rgb(10 9 8 / 26%) 55%, rgb(10 9 8 / 10%) 100%),
+    linear-gradient(0deg, rgb(10 9 8 / 94%) 0%, rgb(10 9 8 / 22%) 58%, rgb(10 9 8 / 35%) 100%);
+}
+
+.beat--hero .beat__content--hero {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(1.25rem, 2.5vw, 2.5rem);
+}
+
+.hero-header {
+  grid-column: 1 / 8;
+}
+
+.hero-title {
+  max-width: 8.6ch;
+  font-size: clamp(4.1rem, 7.25vw, 7.7rem);
+  line-height: 0.9;
+  letter-spacing: -0.052em;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 34%);
+}
+
+.hero-header__eyebrow {
+  gap: clamp(1rem, 2vw, 2rem);
+  color: #d6c5a6;
+}
+
+.beat--hero .archive-label {
+  color: #c8b493;
+}
+
+.hero-prose {
+  grid-column: 9 / 13;
+  max-width: 36ch;
+  padding-left: clamp(1rem, 2vw, 1.5rem);
+  border-left: 1px solid rgb(216 194 156 / 42%);
+  color: #eee6d8;
+  font-size: clamp(1rem, 1.12vw, 1.13rem);
+  line-height: 1.68;
+  text-shadow: 0 2px 14px rgb(0 0 0 / 45%);
+}
+
+.scroll-cue {
+  opacity: 0.72;
+}
+
+/* El rollo adquiere pequeñas irregularidades de hoja de contactos. */
+#beat-rollo .contact-sheet {
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
+}
+
+#beat-rollo .contact-frame:nth-child(1) { transform: rotate(-0.35deg); }
+#beat-rollo .contact-frame:nth-child(2) { transform: translateY(5px) rotate(0.28deg); }
+#beat-rollo .contact-frame:nth-child(3) { transform: rotate(-0.18deg); }
+
+.contact-frame {
+  transition: transform 320ms var(--ease-out-soft), filter 320ms ease;
+}
+
+.contact-frame:hover {
+  filter: brightness(1.04);
+}
+
+/* Instagram: más parecido a una publicación real, pero aún sobrio. */
+#beat-instagram .beat__content {
+  gap: clamp(2rem, 4vw, 4.5rem);
+}
+
+#beat-instagram .act-marker,
+#beat-instagram .prose {
+  grid-column: 1 / 7;
+}
+
+#beat-instagram .instagram-post {
+  grid-column: 8 / 13;
+  width: min(100%, 430px);
+  border: 1px solid rgb(242 235 217 / 13%);
+  border-radius: 8px;
+  box-shadow: 0 22px 60px rgb(36 31 25 / 20%), 0 3px 12px rgb(0 0 0 / 18%);
+}
+
+.instagram-post__chrome {
+  min-height: 54px;
+  padding-inline: 1rem;
+}
+
+.instagram-post__avatar {
+  background:
+    radial-gradient(circle at 50% 42%, #b98547 0 18%, transparent 19%),
+    linear-gradient(145deg, #3b3630, #1f1d1a);
+}
+
+.instagram-thumb {
+  background-position: center;
+  background-size: cover;
+  filter: saturate(0.78) contrast(1.02);
+}
+
+.instagram-post__caption {
+  padding: 1.1rem 1.15rem 1.25rem;
+}
+
+.instagram-post__caption p {
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+#beat-instagram .prose--after-image {
+  grid-column: 1 / 7;
+}
+
+/*
+ * Corrección principal del fishbone:
+ * el texto y la puerta transmedia deben vivir a lados opuestos del eje.
+ * Antes ambos ocupaban la misma columna y dejaban media pantalla vacía.
+ */
+@media (min-width: 960px) {
+  .beat--branch-node > .beat__content,
+  #beat-codigo .beat__content {
+    column-gap: clamp(2.25rem, 4.5vw, 5rem);
+  }
+
+  #beat-ernesto .prose,
+  #beat-quispe .prose,
+  #beat-gabriel .prose {
+    grid-column: 1 / 6;
+  }
+
+  #beat-ernesto .branch-node,
+  #beat-quispe .branch-node,
+  #beat-gabriel .branch-node {
+    grid-column: 8 / 13;
+    grid-row: 1 / span 2;
+  }
+
+  #beat-lucia .prose,
+  #beat-mapa-col .prose {
+    grid-column: 8 / 13;
+  }
+
+  #beat-lucia .branch-node,
+  #beat-mapa-col .branch-node {
+    grid-column: 1 / 6;
+    grid-row: 1 / span 2;
+  }
+
+  #beat-gabriel .act-marker {
+    grid-column: 1 / 6;
+  }
+
+  #beat-mapa-col .act-marker {
+    grid-column: 8 / 13;
+  }
+
+  #beat-codigo .prose {
+    grid-column: 8 / 13;
+  }
+
+  #beat-codigo .branch-node {
+    grid-column: 1 / 6;
+    grid-row: 1;
+  }
+
+  #beat-codigo .beat__content::before {
+    left: 41.666%;
+    width: 8.334%;
+  }
+}
+
+/* Puertas transmedia como fichas de archivo, no botones sueltos. */
+.beat--branch-node .branch-node,
+#beat-codigo .branch-node {
+  align-self: center;
+  width: 100%;
+  max-width: 29rem;
+  margin-top: 0;
+  padding: clamp(1.35rem, 2.7vw, 2rem);
+  border: 1px solid color-mix(in srgb, var(--p4-ink) 17%, transparent);
+  border-radius: 3px;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 24%), transparent 48%),
+    color-mix(in srgb, var(--p4-paper-clear) 70%, transparent);
+  box-shadow: 0 20px 55px rgb(48 39 29 / 7%), 0 2px 8px rgb(48 39 29 / 5%);
+}
+
+.beat--branch-node .branch-node::before {
+  content: "ARCHIVO / ACCESO";
+  display: block;
+  margin-bottom: 1.15rem;
+  color: color-mix(in srgb, var(--p4-ink) 52%, transparent);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.17em;
+}
+
+.branch-node__signal {
+  margin-bottom: 1.35rem;
+}
+
+.branch-node__eyebrow {
+  display: grid;
+  gap: 0.38rem;
+}
+
+.branch-node__eyebrow .archive-label + .archive-label::before {
+  content: none;
+}
+
+.branch-node__eyebrow .archive-label:first-child {
+  color: var(--p4-ink);
+  font-family: var(--font-serif);
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  font-weight: 400;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.branch-node__eyebrow .archive-label:last-child {
+  color: color-mix(in srgb, var(--p4-ink) 58%, transparent);
+  font-size: 0.66rem;
+}
+
+.beat--branch-node .branch-node__enter,
+#beat-codigo .branch-node__enter {
+  width: 100%;
+  min-height: 48px;
+  justify-content: space-between;
+  border-radius: 2px;
+  padding-inline: 1rem;
+}
+
+.beat--branch-node .branch-node__enter::after,
+#beat-codigo .branch-node__enter::after {
+  content: "↗";
+  margin-left: 1rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* El compartimento usa la misma composición, adaptada al cuarto oscuro. */
+#beat-codigo .branch-node {
+  color: var(--color-papel-envejecido);
+  border-color: rgb(242 235 217 / 16%);
+  background:
+    linear-gradient(135deg, rgb(242 235 217 / 5%), transparent 45%),
+    #171512;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 28%);
+}
+
+#beat-codigo .branch-node::before {
+  content: "MECANISMO / BLOQUEADO";
+  display: block;
+  margin-bottom: 1.1rem;
+  color: #9e8a70;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.17em;
+}
+
+#beat-codigo .branch-node__eyebrow .archive-label:first-child {
+  color: #f0e7d8;
+}
+
+#beat-codigo .branch-node__eyebrow .archive-label:last-child,
+#beat-codigo .branch-node__lock-msg {
+  color: #a89479;
+}
+
+/* El cierre gana aire útil sin convertir la invitación en una columna angosta. */
+#beat-cierre .beat__content {
+  gap: clamp(2.5rem, 5vw, 5.5rem);
+}
+
+#beat-cierre .act-marker,
+#beat-cierre .prose--resolution {
+  grid-column: 1 / 7;
+}
+
+#beat-cierre .resolution-cta {
+  grid-column: 8 / 13;
+  padding: clamp(1.65rem, 3vw, 2.35rem);
+  border-radius: 5px;
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 56%), rgb(255 255 255 / 14%)),
+    #edf0ec;
+  box-shadow: 0 24px 70px rgb(47 92 95 / 9%);
+}
+
+#beat-cierre .resolution-cta p {
+  font-size: clamp(1.02rem, 1.35vw, 1.18rem);
+  line-height: 1.62;
+}
+
+#beat-cierre .resolution-cta__explain {
+  color: color-mix(in srgb, var(--p4-ink) 64%, transparent);
+}
+
+#beat-cierre .resolution-cta__btn {
+  width: 100%;
+}
+
+/* Responsive: conserva el pase visual sin forzar dos columnas. */
+@media (max-width: 959px) {
+  :root {
+    --p4-page: min(calc(100% - 2.5rem), 780px);
+  }
+
+  .hero-header {
+    grid-column: 1 / 7;
+  }
+
+  .hero-prose {
+    grid-column: 4 / 9;
+    max-width: 39ch;
+  }
+
+  .beat--branch-node .branch-node,
+  #beat-codigo .branch-node {
+    max-width: 34rem;
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 599px) {
+  :root {
+    --p4-page: calc(100% - 2.25rem);
+  }
+
+  body::before {
+    opacity: 0.02;
+  }
+
+  .story-header {
+    min-height: 3.35rem;
+    backdrop-filter: blur(9px);
+  }
+
+  .hero-title {
+    font-size: clamp(3.45rem, 16vw, 5rem);
+    line-height: 0.92;
+  }
+
+  .hero-prose {
+    max-width: 36ch;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .beat:not(.beat--hero) {
+    padding-block: clamp(5.25rem, 10vh, 7.5rem);
+  }
+
+  .beat--branch-node .branch-node,
+  #beat-codigo .branch-node {
+    padding: 1.2rem;
+    border-radius: 2px;
+  }
+
+  #beat-cierre .resolution-cta {
+    padding: 1.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-frame {
+    transition: none;
+  }
+}
+
+/* Colores base explícitos: background-image no debe volver transparente el papel. */
+#beat-instagram,
+#beat-ernesto,
+#beat-lucia,
+#beat-quispe {
+  background-color: var(--p4-paper);
+}
+
+#beat-gabriel {
+  background-color: #eee5d7;
+}
+
+#beat-mapa-col,
+#beat-brena,
+#beat-nina,
+#beat-nota {
+  background-color: var(--p4-paper-clear);
+}
+
+#beat-cierre {
+  background-color: #edf0ec;
+}
+
+@media (min-width: 600px) {
+  .hero-prose {
+    grid-column: 8 / 13;
+    width: 100%;
+    max-width: 40ch;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 599px) {
+  .hero-prose {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    max-width: 36ch;
+    margin: 1.5rem 0 0;
+  }
+}
+
+@media (max-width: 959px) {
+  .beat--hero .beat__content--hero {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 599px) {
+  .beat--hero .beat__content--hero {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+  }
+
+  .beat--hero .hero-prose {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    max-width: 36ch;
+    margin: 1.5rem 0 0;
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 599px) {
+  .beat--hero .hero-header,
+  .beat--hero .hero-prose,
+  .beat--hero .scroll-cue {
+    grid-column: 1;
+  }
+}
+
+/* La cuadrícula exterior del hero debe ocupar siempre todo el viewport. */
+.beat--hero {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 599px) {
+  .beat--hero .beat__content--hero {
+    width: calc(100% - 2.25rem);
+    max-width: none;
+    margin-inline: auto;
+  }
+
+  .beat--hero .hero-header__eyebrow > * {
+    width: auto;
+    max-width: 100%;
+    white-space: normal;
+  }
+}
+
+/* ================================================================
+   CAPA DE SEGURIDAD FUNCIONAL
+   Mantiene la dirección visual sin interferir con las ramas, botones,
+   overlays ni el scroll interno de las experiencias transmedia.
+   ================================================================ */
+
+/* Evita que la textura global quede por encima de los paneles interactivos. */
+body::before {
+  z-index: 20;
+}
+
+/* Cada puerta transmedia debe conservar prioridad de clic sobre la espina. */
+.beat--branch-node .branch-node,
+#beat-codigo .branch-node {
+  position: relative;
+  z-index: 8;
+  pointer-events: auto;
+}
+
+.beat--branch-node .branch-node__enter,
+#beat-codigo .branch-node__enter,
+.spine-indicator__dot,
+.story-header__title,
+.review-unlock {
+  position: relative;
+  z-index: 9;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+/* Los conectores siguen siendo decorativos y nunca capturan el puntero. */
+.beat--branch-node > .beat__content::before,
+.beat--lock-gate > .beat__content::before,
+.beat--branch-node::after,
+.beat--lock-gate::after {
+  pointer-events: none !important;
+}
+
+/* Las ramas abiertas dominan toda la interfaz, incluso sobre el grano fijo. */
+.branch.is-open {
+  z-index: 1200 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+}
+
+.branch.is-open .branch__inner,
+.branch.is-open .branch__header,
+.branch.is-open .branch__close {
+  pointer-events: auto;
+}
+
+html.is-branch-open body::before {
+  opacity: 0.014;
+}
+
+/* overflow-x: hidden es más compatible con position: fixed y scroll suave. */
+body {
+  overflow-x: hidden;
+}

@@ -1,0 +1,1255 @@
+/*
+ * SPINE.CSS
+ * La Memoria de una Ciudad — Eje principal y sus beats
+ *
+ * El eje es una columna centrada y estrecha.
+ * Los beats tienen temperatura visual propia definida por data-type.
+ * Los paneles de rama (.branch) se expanden dentro de sus <section> padre.
+ */
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SPINE INDICATOR — barra lateral de progreso narrativo
+═══════════════════════════════════════════════════════════════ */
+
+.spine-indicator {
+  position: fixed;
+  top:      50%;
+  right:    var(--indicator-offset);
+  transform: translateY(-50%);
+  z-index:  var(--z-indicator);
+  display:  flex;
+  flex-direction: column;
+  align-items: center;
+  gap:      0;
+  width:    var(--indicator-width);
+  pointer-events: auto;
+}
+
+/* La línea vertical del indicador */
+.spine-indicator__track {
+  position:      absolute;
+  top:           0;
+  bottom:        0;
+  left:          50%;
+  transform:     translateX(-50%);
+  width:         1px;
+  background:    var(--color-gris-carbon);
+  border-radius: var(--radius-pill);
+  overflow:      hidden;
+}
+
+/* El fill animado por spine.js según posición de scroll */
+.spine-indicator__fill {
+  position:         absolute;
+  top:              0;
+  left:             0;
+  width:            100%;
+  height:           0%; /* Actualizado por spine.js */
+  background:       var(--color-lino-linea);
+  border-radius:    var(--radius-pill);
+  transform-origin: top center;
+  transition:       height var(--dur-fast) linear;
+}
+
+/* Lista de nodos */
+.spine-indicator__nodes {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-5);
+  position:       relative;
+  z-index:        1;
+  padding:        var(--space-4) 0;
+}
+
+.spine-indicator__node {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  position:        relative;
+}
+
+/* El punto del indicador */
+.spine-indicator__dot {
+  width:         8px;
+  height:        8px;
+  border-radius: 50%;
+  background:    var(--color-gris-carbon);
+  border:        1px solid var(--color-gris-medio);
+  transition:
+    background   var(--dur-normal) var(--ease-out-soft),
+    border-color var(--dur-normal) var(--ease-out-soft),
+    transform    var(--dur-normal) var(--ease-out-soft);
+  position:      relative;
+  z-index:       1;
+}
+
+.spine-indicator__dot:hover {
+  background:  var(--color-lino-linea);
+  transform:   scale(1.4);
+  border-color: var(--color-papel-envejecido);
+}
+
+/* Nodo activo (gestionado por spine.js: .is-active) */
+.spine-indicator__node.is-active .spine-indicator__dot {
+  background:  var(--color-papel-envejecido);
+  border-color: var(--color-papel-envejecido);
+  transform:   scale(1.5);
+}
+
+.review-unlock {
+  min-height: 32px;
+  margin-left: var(--space-4);
+  padding: 0.35rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--color-lino-linea) 45%, transparent);
+  border-radius: var(--radius-pill);
+  color: var(--color-lino-linea);
+  background: color-mix(in srgb, var(--color-negro-revelador) 72%, transparent);
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.review-unlock:hover,
+.review-unlock:focus-visible {
+  color: var(--color-negro-revelador);
+  background: var(--color-ocre-evidencia);
+  border-color: var(--color-ocre-evidencia);
+}
+
+/* Nodo completado.
+   Usa --color-azul-claro (no el azul-petroleo base) porque este punto
+   vive sobre el fondo oscuro de la página — el tono original cae por debajo
+   del contraste mínimo WCAG AA ahí. Ver variables.css, Fase 6. */
+.spine-indicator__node.is-complete .spine-indicator__dot {
+  background:  var(--color-azul-claro);
+  border-color: var(--color-azul-claro);
+}
+
+/* Tick lateral para nodos de rama */
+.spine-indicator__branch-tick {
+  position: absolute;
+  left:     calc(50% + 8px);
+  top:      50%;
+  transform: translateY(-50%);
+  width:    6px;
+  height:   1px;
+  background: var(--color-gris-medio);
+  transition: background var(--dur-normal) var(--ease-out-soft),
+              width var(--dur-normal) var(--ease-out-soft);
+}
+
+.spine-indicator__node.is-complete .spine-indicator__branch-tick {
+  width:      10px;
+  background: var(--color-azul-claro);
+}
+
+/* Tick de cerradura para el nodo del archivo.
+   Usa el ícono real del mecanismo de diales (svg/lock-mechanism.svg, Fase 5)
+   en vez de un candado genérico — coherente con el objeto real de la historia. */
+.spine-indicator__lock-tick {
+  position:   absolute;
+  left:       calc(50% + 8px);
+  top:        50%;
+  transform:  translateY(-50%);
+  width:      10px;
+  height:     10px;
+  background: url("../svg/lock-mechanism.svg") center / contain no-repeat;
+  opacity:    0.7;
+  transition: opacity var(--dur-normal) var(--ease-out-soft);
+}
+
+[data-locked="false"] .spine-indicator__lock-tick {
+  opacity: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SPINE — EL EJE PRINCIPAL
+═══════════════════════════════════════════════════════════════ */
+
+.spine {
+  position:        relative;
+  z-index:         var(--z-content);
+  padding-right:   calc(var(--indicator-width) + var(--indicator-offset) * 2);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   BEAT — UNIDAD BASE DEL EJE
+   Cada sección del eje es un beat.
+   El espacio entre beats es el "tiempo de revelado":
+   el silencio narrativo entre imágenes que emerge del cuarto oscuro.
+═══════════════════════════════════════════════════════════════ */
+
+.beat {
+  position:        relative;
+  padding-inline:  var(--section-pad);
+  padding-block:   var(--beat-gap);
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+}
+
+.beat + .beat {
+  /* Los beats consecutivos de prose tienen menos separación
+     para que la narrativa fluya sin cortes abruptos. */
+  padding-top: calc(var(--beat-gap) * 0.6);
+}
+
+/* Contenido central del beat */
+.beat__content {
+  width:     100%;
+  max-width: var(--content-width);
+  display:   flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap:       var(--space-8);
+}
+
+.beat__content--centered {
+  align-items: center;
+}
+
+.beat__content--hero {
+  align-items: flex-start;
+  justify-content: flex-end;
+  min-height:  100vh;
+  padding-bottom: var(--space-24);
+}
+
+.beat__footer {
+  margin-top: var(--space-16);
+  width:      100%;
+  max-width:  var(--content-width);
+}
+
+
+/* ─────────────────────────────────────────────────────
+   BEAT TIPO: HERO
+   La primera pantalla. La cámara sobre la banca.
+───────────────────────────────────────────────────── */
+
+.beat--hero {
+  padding:    0;
+  min-height: 100vh;
+  overflow:   hidden;
+  position:   relative;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+/* El fondo cinemático: la imagen de la cámara */
+.beat__backdrop {
+  position: absolute;
+  inset:    0;
+  z-index:  0;
+}
+
+.hero-image {
+  width:    100%;
+  height:   100%;
+}
+
+.hero-image__img {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  object-position: center;
+  filter:     brightness(0.55) contrast(1.05);
+}
+
+/* Viñeta lateral y superior para enmarcar el texto */
+.hero-vignette {
+  position: absolute;
+  inset:    0;
+  background: radial-gradient(
+    ellipse 80% 90% at 30% 60%,
+    transparent 35%,
+    rgba(13, 12, 10, 0.7) 70%,
+    rgba(13, 12, 10, 0.92) 100%
+  );
+}
+
+.beat--hero .beat__content {
+  position:        relative;
+  z-index:         var(--z-content);
+  padding-inline:  var(--section-pad);
+  padding-bottom:  var(--space-24);
+  justify-content: flex-end;
+  min-height:      100vh;
+}
+
+/* La cabecera editorial del inicio */
+.hero-header {
+  display:       flex;
+  flex-direction: column;
+  gap:           var(--space-4);
+}
+
+.hero-header__eyebrow {
+  display: flex;
+  gap:     var(--space-6);
+  align-items: center;
+}
+
+/* El título principal */
+.hero-title {
+  margin-top:     var(--space-4);
+  font-family:    var(--font-serif);
+  font-size:      clamp(var(--text-4xl), 6vw, var(--text-6xl));
+  font-weight:    var(--weight-bold);
+  line-height:    var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color:          var(--color-papel-envejecido);
+  display:        flex;
+  flex-direction: column;
+}
+
+.hero-title__line {
+  display: block;
+}
+
+/* El prose del hero: más pequeño que el estándar, como una nota al pie */
+.beat--hero .hero-prose {
+  margin-top: var(--space-8);
+  max-width:  520px;
+}
+
+.beat--hero .hero-prose p {
+  font-size:   var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color:       var(--color-lino-linea);
+}
+
+/* Scroll cue: el indicador visual de "continuar" */
+.scroll-cue {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            var(--space-2);
+  margin-top:     var(--space-10);
+  opacity:        0.6;
+  animation:      scroll-cue-pulse 2.5s ease-in-out infinite;
+}
+
+.scroll-cue__line {
+  display:       block;
+  width:         1px;
+  height:        40px;
+  background:    linear-gradient(to bottom, transparent, var(--color-lino-linea));
+  animation:     scroll-cue-line 2.5s ease-in-out infinite;
+}
+
+.scroll-cue__text {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color:          var(--color-lino-linea);
+}
+
+@keyframes scroll-cue-pulse {
+  0%, 100% { opacity: 0.4; transform: translateY(0); }
+  50%       { opacity: 0.8; transform: translateY(6px); }
+}
+
+@keyframes scroll-cue-line {
+  0%, 100% { transform: scaleY(0.7); transform-origin: top; }
+  50%       { transform: scaleY(1);   transform-origin: top; }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   BEAT TIPO: IMAGE-SEQUENCE (contact sheet)
+   Las fotografías del rollo revelado.
+───────────────────────────────────────────────────── */
+
+.beat--image-sequence {
+  background: var(--color-carbon);
+}
+
+/* El contact sheet: la hoja de contactos analógica */
+.contact-sheet {
+  width:           100%;
+  max-width:       var(--branch-width);
+  display:         flex;
+  gap:             var(--space-3);
+  justify-content: center;
+  padding-block:   var(--space-8);
+}
+
+/* Marco de foto individual */
+.contact-frame {
+  position:        relative;
+  flex:            0 0 auto;
+  width:           clamp(200px, 22vw, 300px);
+  perspective:     1000px;
+}
+
+/* El contenedor de volteo */
+.contact-frame__flipper {
+  position:        relative;
+  width:           100%;
+  padding-top:     135%; /* Ratio 3:4 — proporción de foto de retrato analógica */
+  transform-style: preserve-3d;
+  transition:      transform var(--dur-slow) var(--ease-in-out-edit);
+}
+
+/* La foto tiene la clase is-flipped cuando el botón se activa */
+.contact-frame.is-flipped .contact-frame__flipper {
+  transform: rotateY(180deg);
+}
+
+.contact-frame__face {
+  position:          absolute;
+  inset:             0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.contact-frame__face--front {
+  background: var(--color-gris-carbon);
+  overflow:   hidden;
+}
+
+.contact-frame__face--front img {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  display:    block;
+}
+
+/*
+  En el primer rollo, la fotografía debe ser legible siempre.
+  La interacción narrativa de esta sección es voltear anverso/reverso; si el
+  revelado animado falla, no debe dejar las imágenes invisibles.
+*/
+.contact-sheet--first .contact-frame__face--front img {
+  clip-path: inset(0 0% 0 0) !important;
+  filter:    brightness(1) saturate(1) !important;
+}
+
+/* Borde de la foto: el borde blanco cálido del papel fotográfico */
+.contact-frame__face::before {
+  content:          '';
+  position:         absolute;
+  inset:            6px;
+  border:           2px solid rgba(242, 235, 217, 0.15);
+  pointer-events:   none;
+  z-index:          1;
+}
+
+/* Los sprockets: los agujeros de la tira de película */
+.contact-frame__sprocket {
+  position:        absolute;
+  left:            0;
+  right:           0;
+  bottom:          -6px;
+  height:          14px;
+  background:      var(--color-negro-revelador);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             var(--space-3);
+}
+
+.contact-frame__sprocket::before,
+.contact-frame__sprocket::after {
+  content:       '';
+  display:       block;
+  width:         6px;
+  height:        5px;
+  border-radius: 1px;
+  background:    var(--color-gris-carbon);
+}
+
+/* El número de frame */
+.contact-frame__number {
+  position:   absolute;
+  top:        var(--space-2);
+  left:       var(--space-2);
+  z-index:    2;
+  font-size:  var(--text-2xs);
+  opacity:    0.7;
+  background: rgba(13, 12, 10, 0.6);
+  padding:    1px var(--space-1);
+}
+
+/* El reverso de la foto: papel con fecha, dirección y frase */
+.contact-frame__face--back {
+  background: var(--color-papel-calido);
+  transform:  rotateY(180deg);
+  display:    flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-reverso {
+  padding:    var(--space-6);
+  display:    flex;
+  flex-direction: column;
+  gap:        var(--space-4);
+}
+
+.photo-reverso__date {
+  font-size:      var(--text-lg);
+  color:          var(--color-tinta-faint);
+  letter-spacing: var(--tracking-normal);
+}
+
+.photo-reverso__address {
+  font-size:  var(--text-xl);
+  color:      var(--color-tinta-oscura);
+  font-style: normal;
+}
+
+.photo-reverso__phrase {
+  font-size:   var(--text-lg);
+  line-height: var(--leading-snug);
+  color:       var(--color-sepia-tinta);
+  font-style:  italic;
+}
+
+/* El botón de volteo: discreto, en el borde inferior */
+.contact-frame__flip {
+  position:       absolute;
+  bottom:         -var(--space-8);
+  left:           50%;
+  transform:      translateX(-50%);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color:          var(--color-tinta-faint);
+  padding:        var(--space-2) var(--space-4);
+  margin-top:     var(--space-6);
+  position:       static;
+  transform:      none;
+  display:        block;
+  text-align:     center;
+  opacity:        0.6;
+  transition:     opacity var(--dur-fast) var(--ease-out-soft),
+                  color   var(--dur-fast) var(--ease-out-soft);
+}
+
+.contact-frame__flip:hover {
+  opacity: 1;
+  color:   var(--color-papel-envejecido);
+}
+
+
+/* ─────────────────────────────────────────────────────
+   BEAT TIPO: DIGITAL (Instagram)
+   El único beat con estética deliberadamente distinta:
+   digital, fría, contrastante con el universo analógico.
+───────────────────────────────────────────────────── */
+
+.beat--digital {
+  background: var(--color-negro-revelador);
+}
+
+.instagram-post {
+  width:         clamp(280px, 50%, 400px);
+  background:    var(--color-carbon);
+  border:        var(--border-thin);
+  border-radius: var(--radius-md);
+  overflow:      hidden;
+  margin-inline: auto;
+  box-shadow:    var(--shadow-paper);
+}
+
+.instagram-post__chrome {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-3);
+  padding:     var(--space-3) var(--space-4);
+  border-bottom: var(--border-hair);
+}
+
+.instagram-post__avatar {
+  width:         28px;
+  height:        28px;
+  border-radius: 50%;
+  background:    var(--color-gris-carbon);
+  border:        1px solid var(--color-gris-medio);
+}
+
+.instagram-post__username {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-sm);
+  color:          var(--color-papel-envejecido);
+  letter-spacing: var(--tracking-normal);
+}
+
+.instagram-post__images {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:     2px;
+}
+
+.instagram-thumb {
+  aspect-ratio: 1;
+  background:   var(--color-gris-carbon);
+  /* Fondos de color como placeholder: las imágenes reales las inyecta spine.js */
+}
+
+.instagram-thumb[data-photo="ernesto"] { background: #2a2520; }
+.instagram-thumb[data-photo="lucia"]   { background: #22201c; }
+.instagram-thumb[data-photo="quispe"]  { background: #1e1c18; }
+
+.instagram-post__caption {
+  padding:     var(--space-4);
+  border-top:  var(--border-hair);
+}
+
+.instagram-post__caption p {
+  font-family: var(--font-sans);
+  font-size:   var(--text-md);
+  line-height: var(--leading-normal);
+  color:       var(--color-papel-calido);
+}
+
+.instagram-post__tags {
+  font-size:   var(--text-sm);
+  color:       var(--color-azul-activo);
+  margin-top:  var(--space-2);
+}
+
+
+/* ─────────────────────────────────────────────────────
+   BEAT TIPO: BRANCH-NODE
+   Los beats que contienen una entrada a rama.
+───────────────────────────────────────────────────── */
+
+.beat--branch-node {
+  position: relative;
+}
+
+/* El nodo de entrada: la llamada a acción para entrar a la rama */
+.branch-node {
+  width:     100%;
+  max-width: var(--content-width);
+  margin-top: var(--space-8);
+  display:   flex;
+  flex-direction: column;
+  gap:       var(--space-4);
+  align-items: flex-start;
+}
+
+.branch-node__signal {
+  display:   flex;
+  flex-direction: column;
+  gap:       var(--space-2);
+}
+
+.branch-node__eyebrow {
+  display:     flex;
+  gap:         var(--space-4);
+  align-items: center;
+}
+
+/* La preview del cuaderno en el nodo de Gabriel */
+.notebook-cover-preview {
+  margin-top:    var(--space-2);
+  width:         clamp(100px, 12vw, 140px);
+  height:        clamp(130px, 16vw, 186px);
+  background:    #3D2E1A;
+  border-radius: 1px 2px 2px 1px;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  box-shadow:    var(--shadow-evidence);
+  position:      relative;
+  overflow:      hidden;
+}
+
+.notebook-cover-preview::before {
+  content:    '';
+  position:   absolute;
+  left:       0;
+  top:        0;
+  bottom:     0;
+  width:      6px;
+  background: #2A1E0E;
+}
+
+.notebook-cover-preview__name {
+  font-size:   var(--text-md);
+  color:       var(--color-lino-linea);
+  text-align:  center;
+  padding:     var(--space-4);
+  line-height: var(--leading-snug);
+}
+
+/* El botón de entrada a rama */
+.branch-node__enter {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             var(--space-3);
+  padding:         var(--space-3) var(--space-6);
+  background:      transparent;
+  border:          var(--border-paper);
+  border-radius:   var(--radius-sm);
+  font-family:     var(--font-mono);
+  font-size:       var(--text-sm);
+  letter-spacing:  var(--tracking-wider);
+  text-transform:  uppercase;
+  color:           var(--color-lino-linea);
+  transition:
+    color            var(--dur-fast) var(--ease-out-soft),
+    border-color     var(--dur-fast) var(--ease-out-soft),
+    background-color var(--dur-fast) var(--ease-out-soft);
+}
+
+.branch-node__enter:hover {
+  color:        var(--color-papel-envejecido);
+  border-color: var(--color-papel-envejecido);
+  background:   var(--color-papel-overlay-05);
+}
+
+/* Estado bloqueado */
+.branch-node__enter--locked {
+  color:        var(--color-gris-sutil);
+  border-color: var(--color-gris-carbon);
+  opacity:      0.5;
+}
+
+.branch-node__enter--locked:hover {
+  color:        var(--color-gris-sutil);
+  border-color: var(--color-gris-carbon);
+  background:   transparent;
+}
+
+
+/* ─────────────────────────────────────────────────────
+   BEAT TIPO: LOCK-GATE
+   El compartimento de la cámara.
+───────────────────────────────────────────────────── */
+
+.beat--lock-gate {
+  background: var(--color-carbon);
+}
+
+/* Vista previa de la cámara con diales sellados */
+.lock-preview {
+  margin-block: var(--space-6);
+}
+
+.lock-preview__camera {
+  display:       inline-flex;
+  flex-direction: column;
+  gap:           var(--space-3);
+  padding:       var(--space-6) var(--space-8);
+  background:    var(--color-gris-carbon);
+  border:        var(--border-thin);
+  border-radius: var(--radius-sm);
+  position:      relative;
+}
+
+.lock-preview__dials {
+  display: flex;
+  gap:     var(--space-2);
+}
+
+.lock-preview__dial {
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  width:          32px;
+  height:         32px;
+  background:     var(--color-negro-revelador);
+  border:         1px solid var(--color-gris-medio);
+  border-radius:  var(--radius-sm);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-md);
+  color:          var(--color-gris-sutil);
+  user-select:    none;
+}
+
+.lock-preview__hatch {
+  width:         100%;
+  height:        6px;
+  background:    var(--color-negro-revelador);
+  border-radius: var(--radius-sm);
+  margin-top:    var(--space-2);
+  position:      relative;
+  overflow:      hidden;
+}
+
+.lock-preview__hatch::after {
+  content:  '';
+  position: absolute;
+  left:     40%;
+  top:      0;
+  bottom:   0;
+  width:    2px;
+  background: var(--color-gris-medio);
+}
+
+/* Mensaje de estado del bloqueo */
+.branch-node__lock-msg {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color:          var(--color-gris-sutil);
+  padding:        var(--space-2) 0;
+}
+
+/* Estado desbloqueado: el mensaje cambia vía spine.js */
+[data-locked="false"] .branch-node__lock-msg p {
+  color: var(--color-ocre-evidencia);
+}
+
+[data-locked="false"] .branch-node__enter--locked {
+  color:          var(--color-ocre-evidencia);
+  border-color:   var(--color-ocre-evidencia);
+  opacity:        1;
+  pointer-events: auto;
+}
+
+[data-locked="false"] .branch-node__enter--locked:hover {
+  background: var(--color-ocre-sutil);
+}
+
+/* Los diales de la preview se animan cuando se desbloquea */
+[data-locked="false"] .lock-preview__dial {
+  color: var(--color-ocre-evidencia);
+  border-color: var(--color-ocre-evidencia);
+}
+
+
+/* ─────────────────────────────────────────────────────
+   BEAT TIPO: TENSION
+   Los dos fragmentos sobre la mesa + el mecanismo descubierto.
+───────────────────────────────────────────────────── */
+
+.beat--tension {
+  background: var(--color-carbon);
+}
+
+/* La mesa de evidencias: los dos fragmentos juntos */
+.evidence-table {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-8);
+  padding:     var(--space-8) 0;
+}
+
+.evidence-table__item {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-3);
+  align-items:    center;
+}
+
+.evidence-table__item figcaption {
+  opacity: 0.7;
+}
+
+.evidence-table__connector {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-3xl);
+  color:          var(--color-gris-sutil);
+  line-height:    1;
+  user-select:    none;
+}
+
+/* Papeles doblados y cartas: objetos físicos diegéticos */
+.folded-paper,
+.letter-paper {
+  background:     var(--color-papel-calido);
+  padding:        var(--space-6) var(--space-8);
+  box-shadow:     var(--shadow-evidence);
+  position:       relative;
+  border-radius:  0;
+}
+
+.folded-paper__crease,
+.letter-paper__fold {
+  position:   absolute;
+  top:        0;
+  right:      0;
+  width:      20px;
+  height:     20px;
+  background: var(--color-lino-linea);
+  clip-path:  polygon(100% 0, 0 0, 100% 100%);
+}
+
+.folded-paper__instruction {
+  font-size:   var(--text-lg);
+  color:       var(--color-sepia-tinta);
+  line-height: var(--leading-snug);
+  font-style:  italic;
+}
+
+.folded-paper__numbers {
+  font-size:      clamp(var(--text-3xl), 5vw, var(--text-4xl));
+  line-height:    1;
+  color:          var(--color-tinta-oscura);
+  letter-spacing: var(--tracking-wide);
+  margin-top:     var(--space-4);
+}
+
+.folded-paper--sm .folded-paper__numbers {
+  font-size: var(--text-2xl);
+}
+
+.letter-paper__salutation {
+  font-size:   var(--text-lg);
+  color:       var(--color-sepia-tinta);
+  margin-bottom: var(--space-3);
+}
+
+.letter-paper__text {
+  font-size:   var(--text-lg);
+  color:       var(--color-tinta-oscura);
+  line-height: var(--leading-snug);
+}
+
+.letter-paper__numbers {
+  font-size:      clamp(var(--text-2xl), 3.5vw, var(--text-3xl));
+  color:          var(--color-tinta-oscura);
+  letter-spacing: var(--tracking-wide);
+  margin-top:     var(--space-4);
+}
+
+.letter-paper--sm {
+  padding: var(--space-4) var(--space-5);
+}
+
+
+/* ─────────────────────────────────────────────────────
+   BEAT TIPO: REVELATION
+   El retorno a la última memoria. La temperatura visual cambia.
+───────────────────────────────────────────────────── */
+
+.beat--revelation {
+  background:        var(--color-carbon);
+  border-top:        1px solid var(--color-ocre-sutil);
+  border-bottom:     1px solid var(--color-ocre-sutil);
+}
+
+/* El espacio vacío antes del texto de la última memoria es deliberado */
+.beat--revelation .beat__content {
+  padding-top: var(--beat-gap);
+}
+
+
+/* ─────────────────────────────────────────────────────
+   BEAT TIPO: CLIMAX
+   La foto de la niña. El beat más silencioso de la experiencia.
+───────────────────────────────────────────────────── */
+
+.beat--climax {
+  background:  var(--color-negro-revelador);
+  align-items: center;
+}
+
+/* El contact sheet del segundo rollo: sobrio, sin filtros decorativos añadidos */
+.contact-sheet--brena {
+  justify-content: center;
+  flex-wrap:       wrap;
+  gap:             var(--space-4);
+  margin-bottom:   var(--space-16);
+}
+
+.contact-sheet--brena .contact-frame {
+  width: clamp(210px, 24vw, 300px);
+}
+
+.contact-sheet--brena .contact-frame img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  height: auto;
+  padding: clamp(0.45rem, 1.2vw, 0.75rem);
+  border: 1px solid color-mix(in srgb, var(--p4-ink) 16%, transparent);
+  background:
+    linear-gradient(135deg, #f7f1e6, #dfd3c1);
+  box-shadow: var(--shadow-photo);
+  object-fit: contain;
+}
+
+/* La imagen revelación: la niña. Sola. Sin contexto alrededor. */
+.climax-image {
+  width:            100%;
+  max-width:        580px;
+  margin-inline:    auto;
+  position:         relative;
+  display:          flex;
+  flex-direction:   column;
+  align-items:      center;
+}
+
+.climax-image__frame {
+  position:      relative;
+  width:         100%;
+  max-width:     min(560px, 84vw);
+  max-height:    78svh;
+  aspect-ratio:  34 / 45;
+  display:       grid;
+  place-items:   center;
+  padding:       clamp(0.5rem, 1.2vw, 0.8rem);
+  background:    #eee7dc;
+  box-shadow:    var(--shadow-photo);
+}
+
+.climax-image__frame img {
+  width:      100%;
+  height:     100%;
+  display:    block;
+  object-fit: contain;
+}
+
+.climax-image__fallback {
+  margin-top:  var(--space-6);
+  padding:     var(--space-5);
+  border:      var(--border-ocre);
+  color:       var(--color-papel-envejecido);
+  background:  color-mix(in srgb, var(--color-carbon) 88%, transparent);
+}
+
+.climax-image__caption {
+  margin-top:  var(--space-8);
+  text-align:  center;
+  max-width:   none;
+}
+
+.climax-image__caption p {
+  font-size:   var(--text-xl);
+  font-style:  italic;
+  color:       var(--color-tinta-faint);
+  line-height: var(--leading-relaxed);
+}
+
+
+/* ─────────────────────────────────────────────────────
+   BEAT TIPO: QUOTE
+   La nota de Gabriel. La frase que lo nombra todo.
+───────────────────────────────────────────────────── */
+
+.beat--quote {
+  background:  var(--color-negro-revelador);
+  min-height:  70vh;
+  justify-content: center;
+}
+
+/* Animación del sobre abriéndose */
+.sobre-open {
+  margin-bottom: var(--space-12);
+}
+
+.sobre-open__envelope {
+  width:         120px;
+  height:        80px;
+  background:    var(--color-papel-calido);
+  position:      relative;
+  margin-inline: auto;
+  box-shadow:    var(--shadow-paper);
+}
+
+.sobre-open__flap {
+  position:    absolute;
+  top:         0;
+  left:        0;
+  width:       100%;
+  height:      50%;
+  background:  var(--color-papel-envejecido);
+  clip-path:   polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top center;
+  transform:   rotateX(0deg);
+  /* fishbone.js / archivo.js anima esto a rotateX(180deg) */
+  transition:  transform var(--dur-slow) var(--ease-in-out-edit);
+  backface-visibility: hidden;
+}
+
+/* La nota de Gabriel: la cita final */
+.nota-gabriel {
+  display:         flex;
+  flex-direction:  column;
+  gap:             var(--space-8);
+  align-items:     center;
+  text-align:      center;
+  max-width:       700px;
+  margin-inline:   auto;
+}
+
+.nota-gabriel__quote {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-4);
+}
+
+.nota-gabriel__line {
+  font-family:    var(--font-serif);
+  font-size:      clamp(var(--text-2xl), 3.5vw, var(--text-4xl));
+  font-weight:    var(--weight-regular);
+  line-height:    var(--leading-snug);
+  font-style:     italic;
+  color:          var(--color-papel-envejecido);
+}
+
+.nota-gabriel__attribution {
+  opacity: 0.6;
+}
+
+.nota-gabriel__attribution cite {
+  font-size:   var(--text-sm);
+  font-style:  normal;
+  font-family: var(--font-mono);
+}
+
+
+/* ─────────────────────────────────────────────────────
+   BEAT TIPO: RESOLUTION
+   El archivo abierto. El cierre de la investigación.
+───────────────────────────────────────────────────── */
+
+.beat--resolution {
+  background:    var(--color-carbon);
+  border-top:    1px solid var(--color-gris-medio);
+}
+
+/* Llamada a participar en el archivo */
+.resolution-cta {
+  margin-top:  var(--space-10);
+  padding:     var(--space-8);
+  border:      var(--border-paper);
+  border-radius: var(--radius-md);
+  display:     flex;
+  flex-direction: column;
+  gap:         var(--space-6);
+  max-width:   var(--prose-width);
+}
+
+.resolution-cta__prompt {
+  font-size: var(--text-lg);
+}
+
+.resolution-cta__explain,
+.resolution-cta__status {
+  font-size:   var(--text-sm);
+  line-height: var(--leading-normal);
+  color:       currentColor;
+  opacity:     0.78;
+}
+
+.resolution-cta__btn {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             var(--space-3);
+  padding:         var(--space-4) var(--space-8);
+  background:      var(--color-ocre-sutil);
+  border:          var(--border-ocre);
+  border-radius:   var(--radius-sm);
+  font-family:     var(--font-mono);
+  font-size:       var(--text-sm);
+  letter-spacing:  var(--tracking-wider);
+  text-transform:  uppercase;
+  color:           var(--color-ocre-evidencia);
+  align-self:      flex-start;
+  transition:
+    background var(--dur-fast) var(--ease-out-soft),
+    color      var(--dur-fast) var(--ease-out-soft);
+}
+
+.resolution-cta__btn:hover {
+  background: var(--color-ocre-evidencia);
+  color:      var(--color-negro-revelador);
+}
+
+/* La línea final */
+.closing-line {
+  font-style:  italic;
+  color:       var(--color-tinta-faint);
+  max-width:   var(--prose-width);
+  padding-top: var(--space-12);
+  border-top:  var(--border-hair);
+}
+
+.closing-meta {
+  margin-top: var(--space-4);
+  display:    flex;
+  gap:        var(--space-6);
+  flex-wrap:  wrap;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ESTRUCTURA BASE DE LAS RAMAS (BRANCH)
+   Lo que todas las ramas comparten: header, inner, close button.
+   El interior específico de cada una vive en su propia hoja CSS.
+═══════════════════════════════════════════════════════════════ */
+
+.branch {
+  width:      100%;
+  max-width:  var(--branch-width);
+  margin-inline: auto;
+  overflow:   hidden;
+  /* Estado inicial: colapsado, invisible. GSAP lo expande. */
+  height:     0;
+  opacity:    0;
+  pointer-events: none;
+  transition:
+    height  var(--dur-branch) var(--ease-in-out-edit),
+    opacity var(--dur-branch) var(--ease-out-soft);
+}
+
+/* Estado activo: inyectado por fishbone.js */
+.branch.is-open {
+  height:         auto;
+  opacity:        1;
+  pointer-events: auto;
+}
+
+.branch__inner {
+  padding:         var(--branch-gap);
+  border:          var(--border-hair);
+  border-radius:   var(--radius-lg);
+  background:      var(--color-carbon-suave);
+  box-shadow:      var(--shadow-branch);
+  margin-top:      var(--space-8);
+}
+
+.branch__header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding-bottom:  var(--space-6);
+  border-bottom:   var(--border-hair);
+  margin-bottom:   var(--space-8);
+}
+
+.branch__meta {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-4);
+}
+
+/* Botón de cierre: regresa al eje exactamente donde estaba */
+.branch__close {
+  display:        inline-flex;
+  align-items:    center;
+  gap:            var(--space-2);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color:          var(--color-tinta-faint);
+  padding:        var(--space-2) var(--space-3);
+  border:         var(--border-hair);
+  border-radius:  var(--radius-sm);
+  transition:
+    color        var(--dur-fast) var(--ease-out-soft),
+    border-color var(--dur-fast) var(--ease-out-soft);
+}
+
+.branch__close:hover {
+  color:        var(--color-papel-envejecido);
+  border-color: var(--color-papel-envejecido);
+}

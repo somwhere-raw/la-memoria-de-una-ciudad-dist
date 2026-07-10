@@ -1,0 +1,714 @@
+/*
+ * HARMONY REWORK · 2026
+ * Replanteo de márgenes, ritmo y composición.
+ * Esta capa solo modifica presentación. No altera estados, IDs ni lógica JS.
+ */
+
+:root {
+  --layout-max: 1120px;
+  --layout-gutter: clamp(1.25rem, 4.2vw, 4rem);
+  --section-space: clamp(6rem, 9vw, 8.5rem);
+  --section-space-compact: clamp(4.75rem, 7vw, 6.5rem);
+  --content-gap: clamp(3rem, 7vw, 7rem);
+  --text-column: 56ch;
+  --card-column: 27rem;
+  --p4-page: min(var(--layout-max), calc(100% - (var(--layout-gutter) * 2)));
+}
+
+/* ================================================================
+   ESTRUCTURA GENERAL
+   ================================================================ */
+
+html {
+  scroll-padding-top: 4.5rem;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* El eje vertical central desaparece por completo. */
+.spine::before,
+.spine::after,
+.beat--branch-node > .beat__content::before,
+.beat--lock-gate > .beat__content::before,
+.beat--branch-node::after,
+.beat--lock-gate::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Un solo ancho editorial para toda la experiencia. */
+.beat:not(.beat--hero) > .beat__content,
+.beat:not(.beat--hero) > .beat__footer {
+  width: var(--p4-page);
+  max-width: var(--layout-max);
+  margin-inline: auto;
+}
+
+/* Ritmo vertical regular; ya no depende de llenar casi todo el viewport. */
+.beat:not(.beat--hero) {
+  min-height: auto;
+  padding-block: var(--section-space);
+}
+
+.beat + .beat {
+  padding-top: var(--section-space);
+}
+
+/* Las escenas que necesitan pausa conservan presencia cinematográfica. */
+:is(#beat-pista, #beat-ernesto, #beat-lucia, #beat-quispe, #beat-codigo, #beat-gabriel, #beat-mapa-col) {
+  min-height: clamp(620px, 76svh, 820px);
+}
+
+:is(#beat-rollo, #beat-mecanismo, #beat-brena, #beat-nina, #beat-nota, #beat-cierre) {
+  padding-block: clamp(7rem, 10vw, 10rem);
+}
+
+/* Separaciones suaves entre materiales sin recurrir a líneas protagonistas. */
+#beat-instagram,
+#beat-ernesto,
+#beat-lucia,
+#beat-quispe,
+#beat-gabriel,
+#beat-mapa-col,
+#beat-brena,
+#beat-nina,
+#beat-nota,
+#beat-cierre {
+  box-shadow: inset 0 1px rgb(57 47 36 / 5%);
+}
+
+#beat-pista,
+#beat-rollo,
+#beat-mecanismo,
+#beat-codigo {
+  box-shadow: inset 0 1px rgb(255 255 255 / 4%);
+}
+
+/* Texto: líneas más cortas, párrafos mejor separados. */
+.beat:not(.beat--hero) .prose {
+  width: 100%;
+  max-width: var(--text-column);
+  font-size: clamp(1.04rem, 1.15vw, 1.18rem);
+  line-height: 1.76;
+}
+
+.beat:not(.beat--hero) .prose p + p {
+  margin-top: clamp(1.25rem, 2vw, 1.8rem);
+}
+
+.act-marker {
+  margin: 0 0 clamp(1.6rem, 3vw, 2.4rem);
+  font-size: 0.69rem;
+  letter-spacing: 0.19em;
+}
+
+.act-marker::before {
+  width: 2rem;
+  margin-right: 0.7rem;
+  opacity: 0.72;
+}
+
+/* ================================================================
+   CABECERA Y NAVEGACIÓN
+   ================================================================ */
+
+.story-header {
+  min-height: 3.75rem;
+  padding-inline:
+    max(var(--layout-gutter), calc((100vw - var(--layout-max)) / 2));
+}
+
+.story-header__title,
+.story-header__act {
+  letter-spacing: 0.13em;
+}
+
+/* El indicador lateral sigue siendo útil, pero deja de dominar. */
+.spine-indicator {
+  right: clamp(0.65rem, 1.5vw, 1.25rem);
+  width: 22px;
+  opacity: 0.66;
+}
+
+.spine-indicator:hover,
+.spine-indicator:focus-within {
+  opacity: 1;
+}
+
+.spine-indicator__dot {
+  width: 10px;
+  height: 10px;
+}
+
+/* ================================================================
+   HERO
+   ================================================================ */
+
+.beat--hero .beat__content--hero {
+  width: var(--p4-page);
+  max-width: var(--layout-max);
+  padding-top: clamp(7.5rem, 13vh, 9.5rem);
+  padding-bottom: clamp(3.75rem, 7vh, 5.5rem);
+  column-gap: clamp(2.5rem, 6vw, 6.5rem);
+}
+
+.hero-header {
+  grid-column: 1 / 8;
+}
+
+.hero-title {
+  max-width: 8.4ch;
+  font-size: clamp(4rem, 7.2vw, 7.35rem);
+  line-height: 0.92;
+}
+
+.hero-prose {
+  grid-column: 8 / 13;
+  max-width: 37ch;
+  padding-left: clamp(1.25rem, 2vw, 1.8rem);
+}
+
+.scroll-cue {
+  margin-top: clamp(2rem, 4vh, 3.5rem);
+}
+
+/* ================================================================
+   ESCENAS NARRATIVAS Y MATERIAL FOTOGRÁFICO
+   ================================================================ */
+
+#beat-pista > .beat__content {
+  max-width: 760px;
+}
+
+#beat-pista .prose {
+  max-width: 58ch;
+}
+
+#beat-rollo > .beat__content {
+  align-items: center;
+}
+
+#beat-rollo .act-marker {
+  align-self: flex-start;
+}
+
+#beat-rollo .prose--centered {
+  max-width: 55ch;
+}
+
+#beat-rollo .contact-sheet {
+  width: 100%;
+  margin-block: clamp(3.5rem, 7vw, 6rem);
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+
+#beat-rollo .prose--after-images {
+  margin-top: 0;
+}
+
+/* Instagram: texto y publicación comparten un mismo centro visual. */
+#beat-instagram > .beat__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+  grid-template-rows: auto auto auto;
+  column-gap: var(--content-gap);
+  row-gap: clamp(1.25rem, 2.2vw, 2rem);
+  align-items: start;
+}
+
+#beat-instagram .act-marker {
+  grid-column: 1;
+  grid-row: 1;
+  margin-bottom: 0.5rem;
+}
+
+#beat-instagram .prose:not(.prose--after-image) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+#beat-instagram .instagram-post {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+  justify-self: end;
+  width: min(100%, 430px);
+  margin: 0;
+}
+
+#beat-instagram .prose--after-image {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+/* ================================================================
+   RAMAS TRANSMEDIA
+   ================================================================ */
+
+.beat--branch-node > .beat__content,
+#beat-codigo > .beat__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, var(--card-column));
+  column-gap: var(--content-gap);
+  row-gap: clamp(1.25rem, 2vw, 2rem);
+  align-items: center;
+}
+
+/* Texto a la izquierda / experiencia a la derecha. */
+#beat-ernesto .prose,
+#beat-quispe .prose {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+#beat-ernesto .branch-node,
+#beat-quispe .branch-node {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* Experiencia a la izquierda / texto a la derecha. */
+#beat-lucia .branch-node {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+#beat-lucia .prose {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* Gabriel y el mapa incluyen marcador de acto. */
+#beat-gabriel .act-marker {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  margin-bottom: 0;
+}
+
+#beat-gabriel .prose {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+#beat-gabriel .branch-node {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+#beat-mapa-col .branch-node {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+#beat-mapa-col .act-marker {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  margin-bottom: 0;
+}
+
+#beat-mapa-col .prose {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+/* Compartimento: misma retícula, con la evidencia a la izquierda. */
+#beat-codigo .branch-node {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+#beat-codigo .prose {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* Tarjetas de acceso más ligeras y con márgenes internos consistentes. */
+.beat--branch-node .branch-node,
+#beat-codigo .branch-node {
+  justify-self: stretch;
+  align-self: center;
+  width: 100%;
+  max-width: var(--card-column);
+  margin: 0;
+  padding: clamp(1.35rem, 2.4vw, 1.8rem);
+  gap: 1.15rem;
+  border-radius: 2px;
+}
+
+.beat--branch-node .branch-node::before,
+#beat-codigo .branch-node::before {
+  margin-bottom: 0.15rem;
+}
+
+.branch-node__signal {
+  margin-bottom: 0.25rem;
+}
+
+.branch-node__eyebrow {
+  gap: 0.42rem;
+}
+
+.beat--branch-node .branch-node__enter,
+#beat-codigo .branch-node__enter {
+  margin-top: 0.25rem;
+}
+
+.notebook-cover-preview,
+.lock-preview {
+  margin-block: 0.5rem 0.25rem;
+}
+
+/* ================================================================
+   MECANISMO, REVELACIÓN Y CIERRE
+   ================================================================ */
+
+#beat-mecanismo > .beat__content {
+  display: flex;
+  max-width: 930px;
+  gap: clamp(2rem, 4vw, 3.25rem);
+}
+
+#beat-mecanismo .act-marker,
+#beat-mecanismo .prose,
+#beat-mecanismo .evidence-table {
+  width: 100%;
+  max-width: none;
+}
+
+#beat-mecanismo .prose {
+  max-width: 60ch;
+}
+
+#beat-mecanismo .evidence-table {
+  margin-block: clamp(0.5rem, 2vw, 1.25rem);
+}
+
+#beat-brena > .beat__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 920px;
+}
+
+#beat-brena .prose {
+  grid-column: 1;
+  max-width: 58ch;
+}
+
+#beat-brena .second-roll-preview {
+  grid-column: 1;
+  width: 100%;
+  margin-top: clamp(3rem, 6vw, 5rem);
+}
+
+#beat-nina > .beat__content {
+  max-width: 880px;
+}
+
+#beat-nota > .beat__content {
+  max-width: 820px;
+  gap: clamp(2.75rem, 5vw, 4.5rem);
+}
+
+#beat-nota .prose--pre-climax {
+  max-width: 56ch;
+}
+
+#beat-cierre > .beat__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(330px, 0.9fr);
+  column-gap: var(--content-gap);
+  row-gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
+}
+
+#beat-cierre .act-marker {
+  grid-column: 1;
+  grid-row: 1;
+  margin-bottom: 0;
+}
+
+#beat-cierre .prose--resolution {
+  grid-column: 1;
+  grid-row: 2;
+  max-width: 58ch;
+}
+
+#beat-cierre .resolution-cta {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  margin: 0;
+  padding: clamp(1.5rem, 2.8vw, 2rem);
+}
+
+#beat-cierre .beat__footer {
+  margin-top: clamp(5rem, 8vw, 7rem);
+}
+
+/* ================================================================
+   TABLET
+   ================================================================ */
+
+@media (max-width: 959px) {
+  :root {
+    --layout-max: 780px;
+    --layout-gutter: clamp(1.5rem, 5vw, 3rem);
+    --section-space: clamp(5.5rem, 10vw, 7.5rem);
+    --content-gap: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  :is(#beat-pista, #beat-ernesto, #beat-lucia, #beat-quispe, #beat-codigo, #beat-gabriel, #beat-mapa-col) {
+    min-height: auto;
+  }
+
+  .beat--hero .beat__content--hero {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  .hero-header {
+    grid-column: 1 / 6;
+  }
+
+  .hero-prose {
+    grid-column: 5 / 9;
+    max-width: 36ch;
+  }
+
+  #beat-instagram > .beat__content,
+  .beat--branch-node > .beat__content,
+  #beat-codigo > .beat__content,
+  #beat-cierre > .beat__content {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  #beat-instagram .act-marker,
+  #beat-instagram .prose:not(.prose--after-image),
+  #beat-instagram .prose--after-image,
+  #beat-instagram .instagram-post,
+  #beat-ernesto .prose,
+  #beat-ernesto .branch-node,
+  #beat-lucia .prose,
+  #beat-lucia .branch-node,
+  #beat-quispe .prose,
+  #beat-quispe .branch-node,
+  #beat-gabriel .act-marker,
+  #beat-gabriel .prose,
+  #beat-gabriel .branch-node,
+  #beat-mapa-col .act-marker,
+  #beat-mapa-col .prose,
+  #beat-mapa-col .branch-node,
+  #beat-codigo .prose,
+  #beat-codigo .branch-node,
+  #beat-cierre .act-marker,
+  #beat-cierre .prose--resolution,
+  #beat-cierre .resolution-cta {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  #beat-instagram .instagram-post {
+    justify-self: center;
+    width: min(100%, 440px);
+    margin-block: 1rem;
+  }
+
+  .beat--branch-node .branch-node,
+  #beat-codigo .branch-node {
+    max-width: 34rem;
+    justify-self: start;
+  }
+
+  #beat-lucia .branch-node,
+  #beat-mapa-col .branch-node,
+  #beat-codigo .branch-node {
+    order: 2;
+  }
+
+  #beat-lucia .prose,
+  #beat-mapa-col .act-marker,
+  #beat-mapa-col .prose,
+  #beat-codigo .prose {
+    order: 1;
+  }
+
+  #beat-cierre .resolution-cta {
+    max-width: 38rem;
+  }
+}
+
+/* ================================================================
+   MÓVIL
+   ================================================================ */
+
+@media (max-width: 599px) {
+  :root {
+    --layout-gutter: 1.25rem;
+    --section-space: clamp(4.75rem, 16vw, 6rem);
+    --section-space-compact: 4.25rem;
+  }
+
+  html {
+    scroll-padding-top: 3.75rem;
+  }
+
+  .story-header {
+    min-height: 3.4rem;
+    padding-inline: 1rem;
+  }
+
+  .story-header__title {
+    max-width: 62vw;
+    font-size: 0.62rem;
+    line-height: 1.35;
+  }
+
+  .story-header__act {
+    max-width: 31vw;
+    font-size: 0.58rem;
+    line-height: 1.35;
+  }
+
+  .spine-indicator {
+    display: none;
+  }
+
+  .beat:not(.beat--hero) {
+    padding-block: var(--section-space);
+  }
+
+  .beat + .beat {
+    padding-top: var(--section-space);
+  }
+
+  :is(#beat-rollo, #beat-mecanismo, #beat-brena, #beat-nina, #beat-nota, #beat-cierre) {
+    padding-block: clamp(5.25rem, 17vw, 7rem);
+  }
+
+  .beat:not(.beat--hero) .prose {
+    font-size: clamp(1rem, 4.4vw, 1.08rem);
+    line-height: 1.72;
+  }
+
+  .beat--hero .beat__content--hero {
+    width: calc(100% - 2.5rem);
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 7rem;
+    padding-bottom: 3rem;
+  }
+
+  .beat--hero .hero-header,
+  .beat--hero .hero-prose,
+  .beat--hero .scroll-cue {
+    grid-column: 1;
+  }
+
+  .hero-title {
+    font-size: clamp(3.35rem, 15vw, 4.7rem);
+  }
+
+  .hero-prose {
+    margin-top: 1.75rem;
+    padding-left: 0;
+    border-left: 0;
+    max-width: 34ch;
+  }
+
+  .scroll-cue {
+    margin-top: 2rem;
+  }
+
+  #beat-rollo .contact-sheet {
+    margin-block: 3rem;
+    gap: 2.25rem;
+  }
+
+  #beat-instagram > .beat__content,
+  .beat--branch-node > .beat__content,
+  #beat-codigo > .beat__content,
+  #beat-cierre > .beat__content {
+    row-gap: 2rem;
+  }
+
+  .beat--branch-node .branch-node,
+  #beat-codigo .branch-node {
+    max-width: none;
+    padding: 1.2rem;
+  }
+
+  .beat--branch-node .branch-node__enter,
+  #beat-codigo .branch-node__enter {
+    min-height: 50px;
+  }
+
+  #beat-mecanismo > .beat__content {
+    gap: 2.25rem;
+  }
+
+  #beat-brena .second-roll-preview {
+    margin-top: 3rem;
+  }
+
+  #beat-nota > .beat__content {
+    gap: 2.75rem;
+  }
+
+  #beat-cierre .resolution-cta {
+    padding: 1.25rem;
+  }
+
+  #beat-cierre .beat__footer {
+    margin-top: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spine-indicator {
+    transition: none;
+  }
+}
+
+/* Ajustes de cierre tras validar la retícula en navegador. */
+:root {
+  --p4-page: min(var(--layout-max), calc(100% - 8rem));
+}
+
+.story-header__title {
+  white-space: nowrap;
+}
+
+#beat-pista > .beat__content {
+  display: block;
+}
+
+#beat-pista .prose {
+  grid-column: auto;
+  width: 100%;
+}
+
+#beat-cierre .beat__footer {
+  grid-column: 1 / -1;
+  grid-row: auto;
+  width: 100%;
+  max-width: none;
+}
+
+@media (max-width: 959px) {
+  :root {
+    --p4-page: min(var(--layout-max), calc(100% - 3rem));
+  }
+}
+
+@media (max-width: 599px) {
+  :root {
+    --p4-page: calc(100% - 2.5rem);
+  }
+
+  .story-header__title {
+    white-space: normal;
+  }
+}

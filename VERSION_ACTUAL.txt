@@ -1,0 +1,15 @@
+LA MEMORIA DE UNA CIUDAD
+VERSIÓN: SINCRONIZADA 3
+FECHA: 10 de julio de 2026
+
+Esta versión contiene:
+- Clic directo por cada fragmento de la transcripción de Don Ernesto.
+- Salto al segundo exacto y reproducción inmediata del audio.
+- Resaltado automático del fragmento activo mientras avanza el podcast.
+- Minuto visible en cada bloque de la transcripción.
+- Aporte final a ancho completo en escritorio.
+- Formulario, privacidad y previsualización distribuidos en una retícula equilibrada.
+- Composición apilada y cómoda en tablet y móvil.
+- Inicio en puerto libre y sin caché.
+
+Abre el proyecto mediante ABRIR_PROYECTO.bat.
